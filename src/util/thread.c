@@ -26,15 +26,11 @@
 /* allocate */
 tpool_t *tpool_create(unsigned int cnt, tfunc controller, tfunc handler)
 {
-	tpool_t *tp = malloc(sizeof(struct _tpool_t));
-
-	if (NULL == tp) {
-		/* failure is not an option */
-		return NULL;
-	}
+	tpool_t *tp = malloc(sizeof *tp);
 
 	/* set it up */
-	tpool_init(tp, cnt, controller, handler);
+	if (tp)
+		tpool_init(tp, cnt, controller, handler);
 
 	return tp;
 }
