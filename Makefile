@@ -4,26 +4,26 @@ all: srv
 
 dirs:
 	mkdir -p lib/
-	mkdir -p include/util/
+	mkdir -p include/{srv,util}/
 
 mods:
 	make -C mods
 
 srv: dirs mods
-	make -C mods
 	make -C src/util
 	make -C test
 	make -C src
+	make -C mods
 
 debug: dirs mods
-	make -C mods
 	make -C src/util debug
 	make -C test
 	make -C src debug
+	make -C mods
 
 clean:
 	make -C mods clean
 	make -C test clean
 	make -C src clean
 	rm -f *.o lib/*.so
-	rm -f include/util/*.h
+	rm -f include/{srv,util}/*.h

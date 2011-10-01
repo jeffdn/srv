@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-#include "../src/mod.h"
+#include <srv/mod.h>
 
 #define HEAD                                                    \
     "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""\

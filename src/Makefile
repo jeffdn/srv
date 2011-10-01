@@ -40,6 +40,7 @@ srv: util req.o conn.o resp.o conf.o srv.o
 	cp util/{hash,stack,thread,vector,utstring,util}.o .
 	${CC} ${CFLAGS} ${OBJ} ${UTIL} -ldl -levent -lpthread -o srv
 	mv srv ../
+	cp mod.h ../include/srv/
 
 clean:
 	make -C util clean

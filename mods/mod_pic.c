@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-#include "../src/mod.h"
+#include <srv/mod.h>
 
 char *handle_pic(char *name, struct srv_mod_trans *mt, 
         struct srv_req_param *params, unsigned int cnt)
