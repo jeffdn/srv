@@ -13,7 +13,7 @@
 #include <util/util.h>
 
 #define SRV_TEST_LEVEL 8
-#define SRV_TEST_ITERS 32
+#define SRV_TEST_ITERS 1024
 
 void *srv_test_handler(void *arg)
 {
@@ -23,13 +23,25 @@ void *srv_test_handler(void *arg)
     sock_t *s = (sock_t *)arg;
 
     request = strdup("GET / HTTP/1.0\r\n\r\n");
+    printf("request: %s", request);
 
     for (i = 0; i < SRV_TEST_ITERS; i++) {
         memset(buf, '\0', sizeof buf);
-        sock_connect(s);
-        sock_send(s, request, strlen(request));
-        sock_recv(s, buf, sizeof buf);
+        
+        if (!sock_connect(s))
+            ERRF(__FILE__, __LINE__, "connecting to host!\n");
+
+        if (!sock_send(s, request, strlen(request)))
+            ERRF(__FILE__, __LINE__, "sending request!\n");
+
+        usleep(500);
+
+        if (!sock_recv(s, buf, sizeof buf))
+            ERRF(__FILE__, __LINE__, "getting response!\n");
+
         sock_disconnect(s);
+
+        printf("%s\n", buf);
     }
 
     free(request);
@@ -57,10 +69,11 @@ int main(int argc, char *argv[])
         /* get these threads rollin' */
         sock_init(&sock[i], SOCK_STREAM, SOCK_TYPE_CLIENT, host, port);
         pthread_create(&p[i], NULL, srv_test_handler, (void *)&sock[i]);
-        pthread_detach(&p[i};
+        printf("pew!\n");
     }
 
     free(host);
+    usleep(1000000);
 
     return 0;
 }
