@@ -34,7 +34,7 @@ void *srv_test_handler(void *arg)
 
     for (i = 0; i < SRV_TEST_ITERS; i++) {
         memset(buf, '\0', sizeof buf);
-        
+
         if (!sock_connect(s))
             ERRF(__FILE__, __LINE__, "connecting to host!\n");
 
@@ -61,14 +61,14 @@ int main(int argc, char *argv[])
 {
     char *host;
     unsigned int port, i;
-    
+
     if (argc != 3) {
         ERRF(__FILE__, __LINE__, "./srvtest hostname port\n");
         return 1;
     }
 
     host = strdup(argv[1]);
-    port = (unsigned int) strtol(argv[2], NULL, 0);
+    port = (unsigned int)strtol(argv[2], NULL, 0);
 
     for (i = 0; i < SRV_TEST_LEVEL; i++) {
         /* get these threads rollin' */

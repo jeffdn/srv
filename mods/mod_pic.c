@@ -14,8 +14,8 @@
 
 #include <srv/mod.h>
 
-char *handle_pic(char *name, struct srv_mod_trans *mt, 
-        struct srv_req_param *params, unsigned int cnt)
+char *handle_pic(char *name, struct srv_mod_trans *mt,
+                 struct srv_req_param *params, unsigned int cnt)
 {
     char path[256];
     char *data, buf[1638400];
@@ -27,7 +27,8 @@ char *handle_pic(char *name, struct srv_mod_trans *mt,
 
     for (i = 0; i < cnt; ++i) {
         if (!strncmp(params[i].key, "name", 4)) {
-            snprintf(path, sizeof path, "/home/jeff/srv/site/pics/%s.jpeg", params[i].val);
+            snprintf(path, sizeof path,
+                     "/home/jeff/srv/site/pics/%s.jpeg", params[i].val);
         } else {
             return NULL;
         }
@@ -41,7 +42,7 @@ char *handle_pic(char *name, struct srv_mod_trans *mt,
 
     if (buf[0] == '\0')
         return NULL;
-    
+
     data = malloc(got);
     memcpy(data, buf, got);
 

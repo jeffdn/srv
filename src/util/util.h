@@ -7,7 +7,7 @@
 #define BASE_UTIL_H
 
 #ifdef WIN32
-	/* why must windows be so fucking gay? */
+ /* why must windows be so fucking gay? */
 #define snprintf _snprintf
 
 #ifdef _DEBUG

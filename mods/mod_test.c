@@ -30,10 +30,10 @@
 #define TAIL                                                    \
     "</p>"                                                      \
     " </body>"                                                  \
-    "</html>"                                                   
+    "</html>"
 
-char *handle_mre(char *path, struct srv_mod_trans *mt, 
-        struct srv_req_param *params, unsigned int cnt)
+char *handle_mre(char *path, struct srv_mod_trans *mt,
+                 struct srv_req_param *params, unsigned int cnt)
 {
     char *data, buf[16384];
     unsigned int i, len;
@@ -51,12 +51,12 @@ char *handle_mre(char *path, struct srv_mod_trans *mt,
         return NULL;
 
     len = strlen(HEAD) + got + strlen(TAIL) + 10;
-    
+
     for (i = 0; i < cnt; i++) {
         /* print out params */
         len += strlen(params[i].key) + strlen(params[i].val) + 9;
     }
-    
+
     data = malloc(len);
 
     if (NULL == data)

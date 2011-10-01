@@ -58,34 +58,34 @@
 
 typedef void *dlptr_t;
 typedef char *(*_srv_modfunc_t) (char *,
-				 struct srv_mod_trans *, struct req_param *,
-				 unsigned int);
+                                 struct srv_mod_trans *, struct req_param *,
+                                 unsigned int);
 
 struct _modfunc {
-	dlptr_t mod;
-	_srv_modfunc_t func;
-	char path[256];
+    dlptr_t mod;
+    _srv_modfunc_t func;
+    char path[256];
 };
 
 typedef struct _resp_t {
-	/* how much have we sent */
-	size_t pos;
+    /* how much have we sent */
+    size_t pos;
 
-	unsigned int code;
-	char *file;
-	unsigned int type;
-	char header[256];
-	size_t headlen;
-	size_t senthead;
-	size_t len;
+    unsigned int code;
+    char *file;
+    unsigned int type;
+    char header[256];
+    size_t headlen;
+    size_t senthead;
+    size_t len;
 
-	/* if we pregenerate content */
-	unsigned int pregen;
-	char *data;
+    /* if we pregenerate content */
+    unsigned int pregen;
+    char *data;
 } resp_t;
 
 /* generate a response from a request */
 int srv_resp_generate(resp_t *, const char *, const char *,
-		      const char *, struct req_param *, unsigned int, hash_t *);
+                      const char *, struct req_param *, unsigned int, hash_t *);
 
 #endif

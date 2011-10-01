@@ -7,30 +7,30 @@
 #define UTIL_HASH_H
 
 typedef struct _hash_entry_t {
-	void *key;
-	void *val;
+    void *key;
+    void *val;
 
-	/* next entry for linked list */
-	struct _hash_entry_t *next;
+    /* next entry for linked list */
+    struct _hash_entry_t *next;
 } hash_entry_t;
 
 typedef struct _hash_t {
-	unsigned int slots;
-	unsigned int count;
-	unsigned int unique;
+    unsigned int slots;
+    unsigned int count;
+    unsigned int unique;
 
-	/* the table */
-	struct _hash_entry_t **data;
+    /* the table */
+    struct _hash_entry_t **data;
 
-	/* key comparison/copying/freeing functions */
-	int (*keycmp) (const void *, const void *);
-	int (*valcmp) (const void *, const void *);
+    /* key comparison/copying/freeing functions */
+    int (*keycmp) (const void *, const void *);
+    int (*valcmp) (const void *, const void *);
 
-	void *(*keycpy) (const void *);
-	void *(*valcpy) (const void *);
+    void *(*keycpy) (const void *);
+    void *(*valcpy) (const void *);
 
-	void (*free_key) (void *);
-	void (*free_val) (void *);
+    void (*free_key) (void *);
+    void (*free_val) (void *);
 } hash_t;
 
 /* create a new hash table */

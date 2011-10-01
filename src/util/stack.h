@@ -7,19 +7,19 @@
 #define UTIL_STACK_H
 
 typedef struct _stacknode_t {
-	void *data;
-	struct _stacknode_t *next;
-	struct _stacknode_t *prev;
+    void *data;
+    struct _stacknode_t *next;
+    struct _stacknode_t *prev;
 } stacknode_t;
 
 typedef struct _sstack_t {
-	unsigned int count;
+    unsigned int count;
 
-	stacknode_t *node;
-	stacknode_t *first;
+    stacknode_t *node;
+    stacknode_t *first;
 
-	void *(*data_alloc) (void *);
-	void (*data_free) (void *);
+    void *(*data_alloc) (void *);
+    void (*data_free) (void *);
 } sstack_t;
 
 /* create a new stack */

@@ -12,20 +12,20 @@
 /* hash iterator */
 
 #define hash_iter_foreach(iter) \
-	for (hash_iter_init (iter, iter->ht); hash_iter_next (iter);)
+    for (hash_iter_init (iter, iter->ht); hash_iter_next (iter);)
 
 typedef struct _hash_iter_t {
-	unsigned int pos;
-	unsigned int depth;
+    unsigned int pos;
+    unsigned int depth;
 
-	/* pointer to a place in the hash's data table */
-	hash_entry_t *he;
-	/* pointer to the hash table */
-	hash_t *ht;
+    /* pointer to a place in the hash's data table */
+    hash_entry_t *he;
+    /* pointer to the hash table */
+    hash_t *ht;
 
-	/* the data */
-	void *first;
-	void *second;
+    /* the data */
+    void *first;
+    void *second;
 } hash_iter_t;
 
 /* create a new hash iterator */
@@ -48,16 +48,16 @@ void hash_iter_free(hash_iter_t *);
 /* vector iterator */
 
 #define vector_iter_foreach(iter) \
-	for (vector_iter_init (iter, iter->vec); vector_iter_next (iter);)
+    for (vector_iter_init (iter, iter->vec); vector_iter_next (iter);)
 
 typedef struct _vector_iter_t {
-	unsigned int pos;
+    unsigned int pos;
 
-	/* our vector */
-	vector_t *vec;
+    /* our vector */
+    vector_t *vec;
 
-	/* the data */
-	void *data;
+    /* the data */
+    void *data;
 } vector_iter_t;
 
 /* create a new hash iterator */

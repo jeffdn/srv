@@ -26,22 +26,22 @@
  */
 module_t *module_new(const char *name, const char *path)
 {
-	module_t *module;
+    module_t *module;
 
 #ifdef DEBUG
-	assert(NULL != name);
-	assert(NULL != path);
+    assert(NULL != name);
+    assert(NULL != path);
 #endif
 
-	module = malloc(sizeof *module);
-	if (NULL == module) {
-		ERRF(__FILE__, __LINE__, "allocating for a new module!\n");
-		return NULL;
-	}
+    module = malloc(sizeof *module);
+    if (NULL == module) {
+        ERRF(__FILE__, __LINE__, "allocating for a new module!\n");
+        return NULL;
+    }
 
-	module_init(module, name, path);
+    module_init(module, name, path);
 
-	return module;
+    return module;
 }
 
 /**
@@ -53,27 +53,27 @@ module_t *module_new(const char *name, const char *path)
 int module_init(module_t * module, const char *name, const char *path)
 {
 #ifdef DEBUG
-	assert(NULL != module);
-	assert(NULL != name);
-	assert(NULL != path);
+    assert(NULL != module);
+    assert(NULL != name);
+    assert(NULL != path);
 #endif
 
-	module->name = strdup(name);
+    module->name = strdup(name);
 
 #ifdef WIN32
-	module->path = malloc(strlen(path) + strlen(name) + 6);
-	snprintf(module->path, strlen(path) + strlen(name) + 6, "%s/%s.dll",
-		 path, name);
+    module->path = malloc(strlen(path) + strlen(name) + 6);
+    snprintf(module->path, strlen(path) + strlen(name) + 6, "%s/%s.dll",
+             path, name);
 #else
-	module->path = malloc(strlen(path) + strlen(name) + 5);
-	snprintf(module->path, strlen(path) + strlen(name) + 5, "%s/%s.so",
-		 path, name);
+    module->path = malloc(strlen(path) + strlen(name) + 5);
+    snprintf(module->path, strlen(path) + strlen(name) + 5, "%s/%s.so",
+             path, name);
 #endif
 
-	module->module = NULL;
-	module->loaded = 0;
+    module->module = NULL;
+    module->loaded = 0;
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -83,28 +83,28 @@ int module_init(module_t * module, const char *name, const char *path)
 int module_load(module_t * module)
 {
 #ifdef DEBUG
-	assert(NULL != module);
+    assert(NULL != module);
 #endif
 
 #ifdef WIN32
-	module->module = LoadLibrary(module->path);
-	if (NULL == module->module) {
-		ERRF(__FILE__, __LINE__, "loading module from file %s!\n",
-		     module->path);
-		return 0;
-	}
+    module->module = LoadLibrary(module->path);
+    if (NULL == module->module) {
+        ERRF(__FILE__, __LINE__, "loading module from file %s!\n",
+             module->path);
+        return 0;
+    }
 #else
-	module->module = dlopen(module->path, RTLD_LAZY);
-	if (NULL == module->module) {
-		ERRF(__FILE__, __LINE__, "loading module from file %s: %s!\n",
-		     module->path, dlerror());
-		return 0;
-	}
+    module->module = dlopen(module->path, RTLD_LAZY);
+    if (NULL == module->module) {
+        ERRF(__FILE__, __LINE__, "loading module from file %s: %s!\n",
+             module->path, dlerror());
+        return 0;
+    }
 #endif
 
-	module->loaded = 1;
+    module->loaded = 1;
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -114,19 +114,19 @@ int module_load(module_t * module)
 void module_unload(module_t * module)
 {
 #ifdef DEBUG
-	assert(NULL != module);
+    assert(NULL != module);
 #endif
 
-	if (module->loaded) {
-		/* k, we gotta do this! */
+    if (module->loaded) {
+        /* k, we gotta do this! */
 #ifdef WIN32
-		FreeLibrary(module->module);
-		module->loaded = 0;
+        FreeLibrary(module->module);
+        module->loaded = 0;
 #else
-		dlclose(module->module);
-		module->loaded = 0;
+        dlclose(module->module);
+        module->loaded = 0;
 #endif
-	}
+    }
 }
 
 /**
@@ -136,15 +136,15 @@ void module_unload(module_t * module)
 dlptr_t module_get(module_t * module)
 {
 #ifdef DEBUG
-	assert(NULL != module);
+    assert(NULL != module);
 #endif
 
-	if (module->loaded) {
-		/* k, we have dlopen()'d the module */
-		return module->module;
-	}
+    if (module->loaded) {
+        /* k, we have dlopen()'d the module */
+        return module->module;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 /**
@@ -154,34 +154,34 @@ dlptr_t module_get(module_t * module)
  */
 funcptr_t module_get_symbol(module_t * module, const char *name)
 {
-	funcptr_t symbol;
+    funcptr_t symbol;
 
 #ifdef DEBUG
-	assert(NULL != module);
-	assert(NULL != name);
+    assert(NULL != module);
+    assert(NULL != name);
 #endif
 
-	if (!module->loaded) {
-		/* um...hello... */
-		return NULL;
-	}
+    if (!module->loaded) {
+        /* um...hello... */
+        return NULL;
+    }
 #ifdef WIN32
-	if (NULL != (symbol = GetProcAddress(module->module, name))) {
-		return symbol;
-	} else {
-		ERRF(__FILE__, __LINE__, "loading symbol %s from %s!\n",
-		     name, module->name);
-	}
+    if (NULL != (symbol = GetProcAddress(module->module, name))) {
+        return symbol;
+    } else {
+        ERRF(__FILE__, __LINE__, "loading symbol %s from %s!\n",
+             name, module->name);
+    }
 #else
-	if (NULL != (symbol = dlsym(module->module, name))) {
-		return symbol;
-	} else {
-		ERRF(__FILE__, __LINE__, "loading symbol %s from %s: %s!\n",
-		     name, module->name, dlerror());
-	}
+    if (NULL != (symbol = dlsym(module->module, name))) {
+        return symbol;
+    } else {
+        ERRF(__FILE__, __LINE__, "loading symbol %s from %s: %s!\n",
+             name, module->name, dlerror());
+    }
 #endif
 
-	return NULL;
+    return NULL;
 }
 
 /**
@@ -191,15 +191,15 @@ funcptr_t module_get_symbol(module_t * module, const char *name)
 void module_destroy(module_t * module)
 {
 #ifdef DEBUG
-	assert(NULL != module);
+    assert(NULL != module);
 #endif
 
-	if (module->name)
-		free(module->name);
-	if (module->path)
-		free(module->path);
+    if (module->name)
+        free(module->name);
+    if (module->path)
+        free(module->path);
 
-	module_unload(module);
+    module_unload(module);
 }
 
 /**
@@ -209,9 +209,9 @@ void module_destroy(module_t * module)
 void module_free(module_t * module)
 {
 #ifdef DEBUG
-	assert(NULL != module);
+    assert(NULL != module);
 #endif
 
-	module_destroy(module);
-	free(module);
+    module_destroy(module);
+    free(module);
 }

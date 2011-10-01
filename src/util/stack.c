@@ -15,18 +15,17 @@
  */
 sstack_t *stack_new(void)
 {
-	sstack_t *stk;
+    sstack_t *stk;
 
-	stk = malloc(sizeof *stk);
-	if (NULL == stk) {
-		ERRF(__FILE__, __LINE__,
-		     "ERROR: allocating for a new stack!\n");
-		exit(1);
-	}
+    stk = malloc(sizeof *stk);
+    if (NULL == stk) {
+        ERRF(__FILE__, __LINE__, "ERROR: allocating for a new stack!\n");
+        exit(1);
+    }
 
-	stack_init(stk);
+    stack_init(stk);
 
-	return stk;
+    return stk;
 }
 
 /**
@@ -36,14 +35,14 @@ sstack_t *stack_new(void)
 void stack_init(sstack_t * stk)
 {
 #ifdef DEBUG
-	assert(NULL != stk);
+    assert(NULL != stk);
 #endif
 
-	stk->count = 0;
-	stk->first = NULL;
-	stk->node = NULL;
-	stk->data_alloc = NULL;
-	stk->data_free = NULL;
+    stk->count = 0;
+    stk->first = NULL;
+    stk->node = NULL;
+    stk->data_alloc = NULL;
+    stk->data_free = NULL;
 }
 
 /**
@@ -53,53 +52,53 @@ void stack_init(sstack_t * stk)
  */
 void stack_push(sstack_t * stk, void *entry)
 {
-	stacknode_t *node;
-	void *tmp;
+    stacknode_t *node;
+    void *tmp;
 
 #ifdef DEBUG
-	assert(NULL != stk);
-	assert(NULL != stk->data_alloc);
+    assert(NULL != stk);
+    assert(NULL != stk->data_alloc);
 #endif
 
-	if (NULL == entry) {
-		tmp = stk->data_alloc(NULL);
-		if (NULL == tmp) {
-			/* sigh... */
-			ERRF(__FILE__, __LINE__,
-			     "ERROR: allocating for new data entry in stack node!\n");
-			exit(1);
-		}
-	} else {
-		tmp = stk->data_alloc(entry);
-	}
+    if (NULL == entry) {
+        tmp = stk->data_alloc(NULL);
+        if (NULL == tmp) {
+            /* sigh... */
+            ERRF(__FILE__, __LINE__,
+                 "ERROR: allocating for new data entry in stack node!\n");
+            exit(1);
+        }
+    } else {
+        tmp = stk->data_alloc(entry);
+    }
 
-	if (NULL == stk->node) {
-		stk->node = malloc(sizeof *(stk->node));
-		if (NULL == stk->node) {
-			ERRF(__FILE__, __LINE__,
-			     "ERROR: allocating for a new stack node!\n");
-			exit(1);
-		}
+    if (NULL == stk->node) {
+        stk->node = malloc(sizeof *(stk->node));
+        if (NULL == stk->node) {
+            ERRF(__FILE__, __LINE__,
+                 "ERROR: allocating for a new stack node!\n");
+            exit(1);
+        }
 
-		stk->node->next = NULL;
-		stk->node->prev = NULL;
-		stk->node->data = tmp;
-		stk->first = stk->node;
-	} else {
-		node = malloc(sizeof *node);
-		if (NULL == node) {
-			ERRF(__FILE__, __LINE__,
-			     "ERROR: allocating for a new stack node!\n");
-			exit(1);
-		}
+        stk->node->next = NULL;
+        stk->node->prev = NULL;
+        stk->node->data = tmp;
+        stk->first = stk->node;
+    } else {
+        node = malloc(sizeof *node);
+        if (NULL == node) {
+            ERRF(__FILE__, __LINE__,
+                 "ERROR: allocating for a new stack node!\n");
+            exit(1);
+        }
 
-		node->prev = stk->node;
-		node->next = NULL;
-		node->data = tmp;
-		stk->node = node;
-	}
+        node->prev = stk->node;
+        node->next = NULL;
+        node->data = tmp;
+        stk->node = node;
+    }
 
-	++stk->count;
+    ++stk->count;
 }
 
 /**
@@ -108,40 +107,40 @@ void stack_push(sstack_t * stk, void *entry)
  */
 void *stack_pop(sstack_t * stk)
 {
-	stacknode_t *node;
-	void *data;
+    stacknode_t *node;
+    void *data;
 
 #ifdef DEBUG
-	assert(NULL != stk);
+    assert(NULL != stk);
 #endif
 
-	if (NULL == stk->node || !(stk->count)) {
-		/* nothing to report */
-		return NULL;
-	} else if (1 == stk->count) {
-		data = stk->first->data;
+    if (NULL == stk->node || !(stk->count)) {
+        /* nothing to report */
+        return NULL;
+    } else if (1 == stk->count) {
+        data = stk->first->data;
 
-		stk->first->data = NULL;
-		stk->first->next = NULL;
-		stk->first->prev = NULL;
-		free(stk->first);
-		stk->first = NULL;
-		stk->node = NULL;
-	} else if (2 == stk->count) {
-		data = stk->first->data;
-		stk->first->data = NULL;
-		stk->first->next = NULL;
-		stk->first->prev = NULL;
-		free(stk->first);
-		stk->first = stk->node;
-	} else {
-		data = stk->first->data;
-		stk->first = stk->first->next;
-	}
+        stk->first->data = NULL;
+        stk->first->next = NULL;
+        stk->first->prev = NULL;
+        free(stk->first);
+        stk->first = NULL;
+        stk->node = NULL;
+    } else if (2 == stk->count) {
+        data = stk->first->data;
+        stk->first->data = NULL;
+        stk->first->next = NULL;
+        stk->first->prev = NULL;
+        free(stk->first);
+        stk->first = stk->node;
+    } else {
+        data = stk->first->data;
+        stk->first = stk->first->next;
+    }
 
-	--stk->count;
+    --stk->count;
 
-	return data;
+    return data;
 }
 
 /**
@@ -150,11 +149,11 @@ void *stack_pop(sstack_t * stk)
  */
 void *stack_peek(sstack_t * stk)
 {
-	if (NULL == stk->node) {
-		return NULL;
-	}
+    if (NULL == stk->node) {
+        return NULL;
+    }
 
-	return stk->node->data;
+    return stk->node->data;
 }
 
 /**
@@ -164,14 +163,14 @@ void *stack_peek(sstack_t * stk)
 void stack_destroy(sstack_t * stk)
 {
 #ifdef DEBUG
-	assert(NULL != stk);
+    assert(NULL != stk);
 #endif
 
-	stack_remove_count(stk, stk->count);
+    stack_remove_count(stk, stk->count);
 
-	stk->count = 0;
-	stk->data_alloc = NULL;
-	stk->data_free = NULL;
+    stk->count = 0;
+    stk->data_alloc = NULL;
+    stk->data_free = NULL;
 }
 
 /**
@@ -181,11 +180,11 @@ void stack_destroy(sstack_t * stk)
 void stack_free(sstack_t * stk)
 {
 #ifdef DEBUG
-	assert(NULL != stk);
+    assert(NULL != stk);
 #endif
 
-	stack_destroy(stk);
-	free(stk);
+    stack_destroy(stk);
+    free(stk);
 }
 
 /**
@@ -196,11 +195,11 @@ void stack_free(sstack_t * stk)
 void stack_set_data_alloc(sstack_t * stk, void *(*data_alloc) (void *))
 {
 #ifdef DEBUG
-	assert(NULL != stk);
-	assert(NULL != data_alloc);
+    assert(NULL != stk);
+    assert(NULL != data_alloc);
 #endif
 
-	stk->data_alloc = data_alloc;
+    stk->data_alloc = data_alloc;
 }
 
 /**
@@ -211,11 +210,11 @@ void stack_set_data_alloc(sstack_t * stk, void *(*data_alloc) (void *))
 void stack_set_data_free(sstack_t * stk, void (*data_free) (void *))
 {
 #ifdef DEBUG
-	assert(NULL != stk);
-	assert(NULL != data_free);
+    assert(NULL != stk);
+    assert(NULL != data_free);
 #endif
 
-	stk->data_free = data_free;
+    stk->data_free = data_free;
 }
 
 /**
@@ -225,16 +224,16 @@ void stack_set_data_free(sstack_t * stk, void (*data_free) (void *))
  */
 int stack_add_count(sstack_t * stk, unsigned int count)
 {
-	unsigned int i;
+    unsigned int i;
 
 #ifdef DEBUG
-	assert(NULL != stk);
+    assert(NULL != stk);
 #endif
 
-	for (i = 0; i < count; i++)
-		stack_push(stk, NULL);
+    for (i = 0; i < count; i++)
+        stack_push(stk, NULL);
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -244,17 +243,17 @@ int stack_add_count(sstack_t * stk, unsigned int count)
  */
 int stack_remove_count(sstack_t * stk, unsigned int count)
 {
-	unsigned int i;
-	void *tmp;
+    unsigned int i;
+    void *tmp;
 
 #ifdef DEBUG
-	assert(NULL != stk);
+    assert(NULL != stk);
 #endif
 
-	for (i = 0; i < count && stk->count; i++) {
-		tmp = stack_pop(stk);
-		stk->data_free(tmp);
-	}
+    for (i = 0; i < count && stk->count; i++) {
+        tmp = stack_pop(stk);
+        stk->data_free(tmp);
+    }
 
-	return 1;
+    return 1;
 }
