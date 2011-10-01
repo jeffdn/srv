@@ -69,17 +69,14 @@ void srv_conf_strip_line(char *buf)
 {
 	int i;
 
-	while (isspace(*buf)) {
-		/* strip leading whitespace */
+    /* strip leading whitespace */
+	while (isspace(*buf))
 		buf++;
-	}
 
+	/* strip trailing whitespace */
 	for (i = strlen(buf) - 1; i >= 0; i--) {
-		/* strip trailing whitespace */
-		if (!isspace(buf[i])) {
-			/* it's ok */
+		if (!isspace(buf[i]))
 			break;
-		}
 
 		buf[i] = '\0';
 	}
@@ -92,6 +89,7 @@ int srv_conf_handler_module(void *pnt, const char *key, const char *val)
 	DEBUGF(__FILE__, __LINE__, "got module config settings: %s, %s\n", key,
 	       val);
 
+    /* determine setting */
 	if (!strncmp(key, "path", 4)) {
 		mods->path = strdup(val);
 	} else if (!strncmp(key, "name", 4)) {
@@ -99,13 +97,12 @@ int srv_conf_handler_module(void *pnt, const char *key, const char *val)
 	} else if (!strncmp(key, "func", 4)) {
 		mods->func = strdup(val);
 	} else if (!strncmp(key, "hnd.", 4)) {
-		if (!strncmp(key + 4, "dir", 3)) {
+		if (!strncmp(key + 4, "dir", 3))
 			mods->hnd[mods->hnd_cnt].type = SRV_HANDLER_DIR;
-		} else if (!strncmp(key + 4, "ext", 3)) {
+	    else if (!strncmp(key + 4, "ext", 3))
 			mods->hnd[mods->hnd_cnt].type = SRV_HANDLER_EXT;
-		} else if (!strncmp(key + 4, "file", 4)) {
+		else if (!strncmp(key + 4, "file", 4))
 			mods->hnd[mods->hnd_cnt].type = SRV_HANDLER_FILE;
-		}
 
 		/* and we're done */
 		mods->hnd[mods->hnd_cnt++].data = strdup(val);
@@ -125,8 +122,7 @@ int srv_conf_process_block(conf_t * conf, const char *blkname,
 	void *pnt = NULL;
 
 	/* we'll determine the type */
-	int (*srv_conf_block_handler)
-	 (void *, const char *, const char *) = NULL;
+	int (*srv_conf_block_handler)(void *, const char *, const char *) = NULL;
 
 	DEBUGF(__FILE__, __LINE__, "we entered a block (type:%s)\n", blkname);
 
@@ -154,10 +150,9 @@ int srv_conf_process_block(conf_t * conf, const char *blkname,
 	}
 
 	while (fgets(buf, sizeof buf, fp)) {
-		if (buf[0] == '}') {
-			/* end of block */
+        /* end of block */
+		if (buf[0] == '}')
 			return 1;
-		}
 
 		if (!regexec(b, buf, sizeof res / sizeof res[0], res, 0)) {
 			/* they tried to open a new block inside ours */
@@ -169,10 +164,9 @@ int srv_conf_process_block(conf_t * conf, const char *blkname,
 		memset(key, '\0', sizeof key);
 		memset(val, '\0', sizeof val);
 
-		if (!srv_conf_parse_line(r, buf, key, val, sizeof key)) {
-			/* bad line, continue */
+	    /* bad line, continue */
+		if (!srv_conf_parse_line(r, buf, key, val, sizeof key))
 			continue;
-		}
 
 		/* handle the values accordingly */
 		srv_conf_block_handler(pnt, key, val);
@@ -217,13 +211,11 @@ int srv_conf_parse(conf_t * conf, const char *file)
 		memset(val, 0, sizeof val);
 
 		buf = line;
-
 		srv_conf_strip_line(buf);
 
-		if (*buf == '#' || *buf == '\0') {
-			/* skip the whole line if it's a comment */
+		/* skip the whole line if it's a comment */
+		if (*buf == '#' || *buf == '\0')
 			continue;
-		}
 
 		if (srv_conf_check_block(&blk_r, buf, key, sizeof key)) {
 			/* we're entering a block */
@@ -239,10 +231,9 @@ int srv_conf_parse(conf_t * conf, const char *file)
 			continue;
 		}
 
-		if (!srv_conf_parse_line(&lin_r, buf, key, val, sizeof key)) {
-			/* doesn't match */
+		/* doesn't match */
+		if (!srv_conf_parse_line(&lin_r, buf, key, val, sizeof key))
 			continue;
-		}
 
 		switch (key[0]) {
 		case 'i':

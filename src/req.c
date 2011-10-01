@@ -8,12 +8,14 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "req.h"
+#include <srv/req.h>
 
 #include <util/util.h>
 #include <util/utstring.h>
 
-#define REQ_LINES   15
+#define REQ_LINES        15
+#define HTTP_ESC_CNT     22
+#define MAX_REPLACE_ITER 128
 
 /* HTTP escape codes */
 static const char *http_esc_codes[][2] = {
@@ -54,10 +56,8 @@ unsigned int srv_req_parse(req_t * req)
 	assert(NULL != req);
 #endif
 
-	if (NULL != req->path) {
-		/* free the requested fname */
+	if (NULL != req->path)
 		free(req->path);
-	}
 
 	req->param_cnt = 0;
 	req->port = 0;
@@ -81,19 +81,16 @@ unsigned int srv_req_parse(req_t * req)
 	/* first parse the GET line */
 	if (!strncmp(str, "GET", 3)) {
 		req->meth = HTTP_MTHD_GET;
-
-		/* get rid of 'GET ' */
 		str += 4;
 #if 0
 	} else if (!strncmp(str, "PUT", 3)) {
 		req->meth = HTTP_MTHD_PUT;
-
-		/* get rid of 'PUT ' */
 		str += 4;
+    } else if (!strncmp(str, "POST", 4)) {
+        req->meth = HTTP_MTHD_POST;
+        str += 5;
 	} else if (!strncmp(str, "HEAD", 4)) {
 		req->meth = HTTP_MTHD_HEAD;
-
-		/* get rid of 'HEAD ' */
 		str += 5;
 #endif
 	} else {
@@ -102,10 +99,8 @@ unsigned int srv_req_parse(req_t * req)
 	}
 
 	/* which http/x.x is this? */
-	if (NULL == (tmp = strchr(str, '.'))) {
-		/* doesn't have that shit? */
+	if (NULL == (tmp = strchr(str, '.')))
 		return 0;
-	}
 
 	req->type = (*tmp == '1') ? 1 : 0;
 
@@ -117,12 +112,10 @@ unsigned int srv_req_parse(req_t * req)
 		/* make a copy */
 		pa = strdup(str);
 
-		for (i = 0;
-		     i < (sizeof http_esc_codes / sizeof http_esc_codes[0]);
-		     i++) {
+		for (i = 0; i < HTTP_ESC_CNT; i++) {
 			/* fix up the path */
 			pb = strreplace(pa, http_esc_codes[i][0],
-					http_esc_codes[i][1], 128);
+					http_esc_codes[i][1], MAX_REPLACE_ITER);
 
 			/* clean it up */
 			free(pa);
@@ -142,15 +135,11 @@ unsigned int srv_req_parse(req_t * req)
 		if (NULL != pmcopy) {
 			while (NULL != (pm = strsep(&pmcopy, "&")) &&
 			       req->param_cnt < SRV_REQ_PARAM_MAX) {
-				if (!strlen(pm)) {
-					/* nothing in this one ? */
+				if (!strlen(pm))
 					continue;
-				}
 
-				if (NULL == (tmp = strchr(pm, '='))) {
-					/* malformed? */
+				if (NULL == (tmp = strchr(pm, '=')))
 					continue;
-				}
 
 				req->params[req->param_cnt].val =
 				    strdup(tmp + 1);
@@ -173,10 +162,8 @@ unsigned int srv_req_parse(req_t * req)
 	}
 
 	while (NULL != (str = strsep(&copy, "\r\n"))) {
-		if (!strlen(str)) {
-			/* this is the nether-region between '\r' and '\n' */
+		if (!strlen(str))
 			continue;
-		}
 
 		if (!strncmp(str, "User-Agent", 10)) {
 			/* user agent directive */
@@ -193,20 +180,17 @@ unsigned int srv_req_parse(req_t * req)
 		} else if (!strncmp(str, "Connection", 10)) {
 			/* close when we're done? */
 			tmp = strchr(str, ' ');
-			if (!strncmp(++tmp, "close", 5)) {
-				/* close the connection when we're done! */
+
+			if (!strncmp(++tmp, "close", 5))
 				req->close = 1;
-			} else {
-				/* persistent */
-				req->close = 0;
-			}
+            else
+                req->close = 0;
 		} else if (!strncmp(str, "Host", 4)) {
 			/* host/port comboooo */
 			str += 5;
-			while (*str == ' ') {
-				/* this is slightly diff because we split twice */
+
+			while (*str == ' ')
 				str++;
-			}
 
 			/* the :port */
 			tmp = strchr(str, ':');

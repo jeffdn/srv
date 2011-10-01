@@ -28,10 +28,10 @@
 #include <util/stack.h>
 #include <util/thread.h>
 
-#include "conn.h"
-#include "conf.h"
-#include "resp.h"
-#include "req.h"
+#include <srv/conn.h>
+#include <srv/conf.h>
+#include <srv/resp.h>
+#include <srv/req.h>
 
 #define SRV_VHOST_MAX 128
 #define SRV_TPOOL_MAX 16
@@ -135,7 +135,6 @@ void srv_accept_new_conn(int fd, short ev, void *arg)
 			       &socklen)) == -1) {
 		ERRF(__FILE__, __LINE__, "accepting conn: %s, %d!\n",
 		     strerror(errno), fd);
-		exit(0);
 		return;
 	}
 

@@ -20,8 +20,10 @@
 #include <util/hash.h>
 #include <util/util.h>
 
-#include "mod.h"
-#include "resp.h"
+#include <srv/mod.h>
+#include <srv/resp.h>
+
+#define MIME_TYPE_CNT 31
 
 /* http response codes */
 static const char *resp_status[][2] = {
@@ -69,37 +71,37 @@ static const char *resp_status[][2] = {
 
 /* the mime types we support */
 static const char *mime_types[][2] = {
-	{"", "application/octet-stream"},
-	{"avi", "video/x-msvideo"},
-	{"c", "text/plain"},
+	{"",     "application/octet-stream"},
+	{"avi",  "video/x-msvideo"},
+	{"c",    "text/plain"},
 	{"conf", "text/plain"},
-	{"cpp", "text/plain"},
-	{"css", "text/css"},
-	{"gif", "image/gif"},
-	{"gz", "application/x-gzip"},
-	{"h", "text/plain"},
+	{"cpp",  "text/plain"},
+	{"css",  "text/css"},
+	{"gif",  "image/gif"},
+	{"gz",   "application/x-gzip"},
+	{"h",    "text/plain"},
 	{"html", "text/html"},
-	{"htm", "text/html"},
+	{"htm",  "text/html"},
 	{"jpeg", "image/jpeg"},
-	{"jpg", "image/jpeg"},
-	{"js", "application/javascript"},
-	{"m4a", "audio/mp4"},
+	{"jpg",  "image/jpeg"},
+	{"js",   "application/javascript"},
+	{"m4a",  "audio/mp4"},
 	{"midi", "audio/midi"},
-	{"mp3", "audio/mpeg"},
+	{"mp3",  "audio/mpeg"},
 	{"mpeg", "video/mpeg"},
-	{"mpg", "video/mpeg"},
-	{"ogg", "application/ogg"},
-	{"pdf", "application/pdf"},
-	{"php", "text/plain"},	/* for now */
-	{"pl", "text/plain"},	/* for now */
-	{"png", "image/png"},
-	{"sd", "text/plain"},
-	{"swf", "application/x-shockwave-flash"},
+	{"mpg",  "video/mpeg"},
+	{"ogg",  "application/ogg"},
+	{"pdf",  "application/pdf"},
+	{"php",  "text/plain"},	/* for now */
+	{"pl",   "text/plain"},	/* for now */
+	{"png",  "image/png"},
+	{"sd",   "text/plain"},
+	{"swf",  "application/x-shockwave-flash"},
 	{"tiff", "image/tiff"},
-	{"txt", "text/plain"},
-	{"wav", "audio/x-wav"},
-	{"wmv", "video/x-ms-wmv"},
-	{"xml", "text/xml"}
+	{"txt",  "text/plain"},
+	{"wav",  "audio/x-wav"},
+	{"wmv",  "video/x-ms-wmv"},
+	{"xml",  "text/xml"}
 };
 
 /* file structure */
@@ -116,6 +118,11 @@ char *srv_build_dir_index(const char *, file_t *, unsigned int);
 /* srv responses */
 void srv_resp_403(resp_t * resp, const char *date)
 {
+#ifdef DEBUG
+    assert(NULL != resp);
+    assert(NULL != date);
+#endif
+
 	resp->code = RESP_HTTP_403;
 	resp->type = 9;
 	resp->len = strlen(RESP_403_HTML);
@@ -137,6 +144,11 @@ void srv_resp_403(resp_t * resp, const char *date)
 
 void srv_resp_404(resp_t * resp, const char *date)
 {
+#ifdef DEBUG
+    assert(NULL != resp);
+    assert(NULL != date);
+#endif
+
 	resp->code = RESP_HTTP_404;
 	resp->type = 9;
 	resp->len = strlen(RESP_404_HTML);
@@ -168,10 +180,9 @@ char *srv_get_extension(const char *filename)
 #endif
 
 	ext = strrchr(filename, '.');
-	if (NULL == ext) {
-		/* this file has no extension (or is a dir) */
+	
+    if (NULL == ext) 
 		return NULL;
-	}
 
 	return ++ext;
 }
@@ -179,16 +190,14 @@ char *srv_get_extension(const char *filename)
 /**
  * private function
  */
-int __srv_list_filter(const struct dirent *ent)
+int _srv_list_filter(const struct dirent *ent)
 {
 #ifdef DEBUG
 	assert(NULL != ent);
 #endif
 
-	if (*ent->d_name == '.') {
-		/* no hidden files or dir shit */
+	if (*ent->d_name == '.')
 		return 0;
-	}
 
 	return 1;
 }
@@ -261,7 +270,7 @@ file_t *srv_list_dir(const char *dir, unsigned int *cnt)
 	assert(NULL != cnt);
 #endif
 
-	i = scandir(dir, &ent, __srv_list_filter, alphasort);
+	i = scandir(dir, &ent, _srv_list_filter, alphasort);
 
 	if (i < 0) {
 		/* an error occurred! */
@@ -274,8 +283,8 @@ file_t *srv_list_dir(const char *dir, unsigned int *cnt)
 
 	if (NULL == list) {
 		ERRF(__FILE__, __LINE__, "allocation error!\n");
-		exit(1);
-	}
+	    return NULL;
+    }
 
 	/* filename thinnng */
 	snprintf(tmp, sizeof tmp, "%s/", dir);
@@ -316,11 +325,9 @@ void srv_filelist_free(file_t * list, unsigned int cnt)
 	assert(0 != cnt);
 #endif
 
-	for (i = 0; i < cnt; i++) {
-		if (NULL != list[i].name) {
+	for (i = 0; i < cnt; i++)
+		if (NULL != list[i].name)
 			free(list[i].name);
-		}
-	}
 
 	free(list);
 }
@@ -429,10 +436,7 @@ int srv_resp_generate(resp_t * resp, const char *root,
 			if (NULL == ext) {
 				resp->type = 0;
 			} else {
-				for (i = 1;
-				     i <
-				     (sizeof mime_types / sizeof mime_types[0]);
-				     i++) {
+				for (i = 1; i < MIME_TYPE_CNT; i++) {
 					if (!strcmp(ext, mime_types[i][0])) {
 						/* found it! */
 						resp->type = i;
@@ -465,9 +469,7 @@ int srv_resp_generate(resp_t * resp, const char *root,
 		if (NULL == ext) {
 			resp->type = 0;
 		} else {
-			for (i = 1;
-			     i < (sizeof mime_types / sizeof mime_types[0]);
-			     i++) {
+			for (i = 1; i < MIME_TYPE_CNT; i++) {
 				if (!strcmp(ext, mime_types[i][0])) {
 					/* found it! */
 					resp->type = i;

@@ -42,8 +42,8 @@ sock_t *sock_new(unsigned int proto, unsigned int type, const char *host,
 	if (NULL == sock) {
 		ERRF(__FILE__, __LINE__,
 		     "error allocating memory for new sock!\n");
-		exit(1);
-	}
+	    return NULL;
+    }
 
 	memset(sock, 0, sizeof *sock);
 	if (!sock_init(sock, proto, type, host, port)) {

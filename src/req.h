@@ -11,6 +11,7 @@
 /* unsupported */
 #define HTTP_MTHD_PUT       1
 #define HTTP_MTHD_HEAD      2
+#define HTTP_MTHD_POST      3
 /* unsupported */
 
 #define SRV_REQ_PARAM_MAX   64

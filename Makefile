@@ -5,6 +5,8 @@ all: srv
 dirs:
 	mkdir -p lib/
 	mkdir -p include/{srv,util}/
+	cp src/*.h include/srv/
+	cp src/util/*.h include/util/
 
 mods:
 	make -C mods

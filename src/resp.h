@@ -8,8 +8,8 @@
 
 #include <util/hash.h>
 
-#include "req.h"
-#include "mod.h"
+#include <srv/req.h>
+#include <srv/mod.h>
 
 #define RESP_HTTP_200     2
 #define RESP_HTTP_403    19

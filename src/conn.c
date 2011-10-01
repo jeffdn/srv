@@ -18,7 +18,7 @@
 
 #include <util/util.h>
 
-#include "conn.h"
+#include <srv/conn.h>
 
 /**
  * initialize a connection

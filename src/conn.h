@@ -12,8 +12,8 @@
 #include <arpa/inet.h>
 #include <event.h>
 
-#include "resp.h"
-#include "req.h"
+#include <srv/resp.h>
+#include <srv/req.h>
 
 #define CONN_STATE_NEW      1
 #define CONN_STATE_REQ      2
