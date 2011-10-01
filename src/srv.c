@@ -35,6 +35,7 @@
 
 #define SRV_VHOST_MAX 128
 #define SRV_TPOOL_MAX 16
+#define SRV_CONN_MAX  128
 
 struct _workunit {
 	int fd;
@@ -49,7 +50,7 @@ struct _workunit {
 /* our global config */
 static conf_t conf;
 /* the pool of connections */
-static conn_t pool[2048];
+static conn_t pool[SRV_CONN_MAX];
 /* thread pool */
 static tpool_t tp;
 /* list of paths and the module to execute with */
@@ -221,14 +222,12 @@ void *srv_threadpool_controller(void *arg)
 				}
 			}
 
-#if 0
 			if (tp.cnt == i) {
 				/* there were no available threads, throw back on stack */
 				tpool_add_work(&tp, (void *)wu->fd);
 				free(wu);
 				wu = NULL;
 			}
-#endif
 		}
 	}
 
@@ -558,7 +557,7 @@ int main(int argc, char *argv[])
 	printf("copyright (c) 2007, 2011\n");
 	printf("jeff nettleton\n");
 	printf("jeffdn@gmail.com\n\n");
-	printf("  port(s): ");
+	printf("  port(s):  ");
 
 	for (i = 0; i < conf.port_cnt; i++) {
 		/* all the ports we're on */
@@ -566,16 +565,23 @@ int main(int argc, char *argv[])
 	}
 
 	printf("\n");
-	printf("  docroot:  %s\n", conf.docroot);
-	printf("  index:    %s\n", conf.index);
-	printf("  hostname: %s\n", conf.hostname);
-	printf("  chroot:   %s\n", (conf.chroot) ? "yes" : "no");
+	printf("  docroot:   %s\n", conf.docroot);
+	printf("  index:     %s\n", conf.index);
+	printf("  hostname:  %s\n", conf.hostname);
+	printf("  chroot:    %s\n", (conf.chroot) ? "yes" : "no");
 
 	/* if we're running as root... */
 	if (conf.chroot) {
-		printf("  user:     %s\n", conf.user);
-		printf("  group:    %s\n", conf.group);
+		printf("  user:      %s\n", conf.user);
+		printf("  group:     %s\n", conf.group);
 	}
+
+    printf("  module(s): ");
+
+    for (i = 0; i < conf.mod_cnt; i++) 
+        printf("%s ", conf.mods[i].name);
+    
+    printf("%s\n", (conf.mod_cnt) ? " " : "none");
 
 	/* initialize libevent */
 	event_init();
