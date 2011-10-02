@@ -30,24 +30,31 @@ char *handle_pic(char *name, struct srv_mod_trans *mt,
             snprintf(path, sizeof path,
                      "/home/jeff/srv/site/pics/%s.jpeg", params[i].val);
         } else {
+            mt->status = SRV_MOD_FAILURE;
             return NULL;
         }
     }
 
-    if (!(fd = open(path, O_RDONLY)))
+    if (!(fd = open(path, O_RDONLY))) {
+        mt->status = SRV_MOD_FAILURE;
         return NULL;
+    }
 
     got = read(fd, buf, sizeof buf);
     close(fd);
 
-    if (buf[0] == '\0')
+    if (buf[0] == '\0') {
+        mt->status = SRV_MOD_FAILURE;
         return NULL;
+    }
 
     data = malloc(got);
     memcpy(data, buf, got);
 
-    if (NULL == data)
+    if (NULL == data) {
+        mt->status = SRV_MOD_FAILURE;
         return NULL;
+    }
 
     mt->ftype = 12;
     mt->status = SRV_MOD_SUCCESS;

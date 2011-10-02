@@ -62,10 +62,9 @@ char *strjoin(const char **words, const char *joiner, unsigned int cnt)
 
     newlen = 1;
 
-    for (i = 0; i < cnt; i++) {
-        /* calculate the length of the new string */
+    /* calculate the length of the new string */
+    for (i = 0; i < cnt; i++) 
         newlen += strlen(words[i]);
-    }
 
     newlen += strlen(joiner) * (cnt - 1);
 
@@ -96,8 +95,8 @@ char *strsubstr(const char *str, unsigned int length, int offset)
     assert(NULL != str);
 #endif
 
+    /* impossible ! */
     if (length > strlen(str)) {
-        /* impossible ! */
         if (offset >= 0)
             length = (unsigned)strlen(str) - offset;
         else
@@ -157,9 +156,8 @@ char *strreplace(char *str, char *old, char *new, unsigned int cnt)
 
         if (!strncmp(p, old, oldlen)) {
             /* they match */
-            for (j = 0; j < newlen; j++) {
+            for (j = 0; j < newlen; j++) 
                 vector_push(vec, new + j);
-            }
 
             i++;
             p += oldlen - 1;
@@ -170,15 +168,12 @@ char *strreplace(char *str, char *old, char *new, unsigned int cnt)
         }
     }
 
-    if (2 == status) {
-        for (; '\0' != *p; p++) {
+    if (2 == status)
+        for (; '\0' != *p; p++)
             vector_push(vec, p);
-        }
-    }
 
-    if (NULL != (char *)vector_get_at(vec, vec->count - 1)) {
+    if (NULL != (char *)vector_get_at(vec, vec->count - 1))
         vector_push(vec, &null);
-    }
 
     fresh = strdup((const char *)vec->data);
     vector_free(vec);

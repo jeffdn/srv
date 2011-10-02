@@ -18,12 +18,11 @@
  */
 vector_t *vector_new(unsigned int slots, unsigned int size)
 {
-    vector_t *vec;
+    vector_t *vec = malloc(sizeof *vec);
 
-    vec = malloc(sizeof *vec);
     if (NULL == vec) {
         ERRF(__FILE__, __LINE__, "allocating for a new vector!\n");
-        exit(1);
+        return NULL;
     }
 
     vector_init(vec, slots, size);
@@ -59,10 +58,10 @@ int vector_init(vector_t * vec, unsigned int slots, unsigned int size)
         ERRF(__FILE__, __LINE__,
              "allocating vector data table (slots=%u,size=%u)!\n",
              vec->slots, vec->size);
-        exit(1);
+        return 0;
     }
 
-    /* memset ((char *) vec->data, 0, vec->slots * vec->size); */
+    memset(vec->data, '\0', (vec->slots * vec->size));
 
     return 1;
 }
@@ -181,16 +180,14 @@ void vector_clear(vector_t * vec)
  * destroy the vector
  * @param vec the vector to destroy
  */
-void vector_destroy(vector_t * vec)
+void vector_destroy(vector_t *vec)
 {
 #ifdef DEBUG
     assert(NULL != vec);
 #endif
 
-    if (NULL != vec->data) {
-        /* vector_clear (vec); */
+    if (NULL != vec->data)
         free(vec->data);
-    }
 
     vec->slots = 0;
     vec->count = 0;

@@ -19,12 +19,11 @@
  */
 hash_t *hash_new(unsigned int slots)
 {
-    hash_t *ht;
+    hash_t *ht = malloc(sizeof *ht);
 
-    ht = malloc(sizeof *ht);
     if (NULL == ht) {
         ERRF(__FILE__, __LINE__, "allocating memory for new hash_t!\n");
-        exit(1);
+        return NULL;
     }
 
     hash_init(ht, slots);
@@ -49,6 +48,7 @@ void hash_init(hash_t * ht, unsigned int slots)
      *
      * ht->slots = (unsigned int) ceil (sqrt (slots) * log (slots));
      */
+
     ht->slots = slots;
     ht->count = 0;
     ht->unique = 0;
@@ -126,11 +126,6 @@ int hash_insert(hash_t * ht, const void *key, const void *val)
 #endif
 
     if (NULL == ht->keycpy || NULL == ht->valcpy) {
-        /* for now return 0. I'm not sure if in the future
-         * it would be better to try just using the default
-         * copying functions, but that could turn out very
-         * badly. (i.e. strdup ((struct something *) key)
-         */
         ERRF(__FILE__, __LINE__,
              "key/value copying functions are not set properly!\n");
         return 0;
@@ -147,7 +142,6 @@ int hash_insert(hash_t * ht, const void *key, const void *val)
     hash = hash_func(key);
     index = hash % ht->slots;
 
-#if 0
     if (NULL != (he = ht->data[index])) {
         DEBUGF(__FILE__, __LINE__, "got a duplicate...\n");
 
@@ -165,7 +159,6 @@ int hash_insert(hash_t * ht, const void *key, const void *val)
     } else {
         ht->unique++;
     }
-#endif
 
     he = malloc(sizeof *he);
     if (NULL == he) {

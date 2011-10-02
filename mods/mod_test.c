@@ -50,7 +50,7 @@ char *handle_mre(char *path, struct srv_mod_trans *mt,
     if (buf[0] == '\0')
         return NULL;
 
-    len = strlen(HEAD) + got + strlen(TAIL) + 10;
+    len = strlen(HEAD) + got + strlen(TAIL) + 14;
 
     for (i = 0; i < cnt; i++) {
         /* print out params */
@@ -62,6 +62,7 @@ char *handle_mre(char *path, struct srv_mod_trans *mt,
     if (NULL == data)
         return NULL;
 
+    memset(data, '\0', len);
     snprintf(data, len, "%s<h3>%s</h3>", HEAD, buf);
 
     for (i = 0; i < cnt; i++) {
@@ -70,6 +71,8 @@ char *handle_mre(char *path, struct srv_mod_trans *mt,
         strcat(data, params[i].val);
         strcat(data, "<br/>");
     }
+
+    strcat(data, "\r\n\r\n");
 
     mt->ftype = 9;
     mt->status = SRV_MOD_SUCCESS;
