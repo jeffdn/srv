@@ -14,3 +14,4 @@ problem. Has support for many of the standard webserver features, including:
  - chroot user jails, with user and group switching (requires root)
  - basic support for modules that perform custom actions
  - ability to run on multiple ports at once
+ - basic caching

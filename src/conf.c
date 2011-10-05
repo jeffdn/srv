@@ -266,12 +266,18 @@ int srv_conf_parse(conf_t * conf, const char *file)
             break;
 
         case 'h':
-            /* hostname */
-            if (NULL != conf->hostname)
-                free(conf->hostname);
+            if (key[2] == 'o') {
+                /* hostname */
+                if (NULL != conf->hostname)
+                    free(conf->hostname);
 
-            conf->hostname = strdup(val);
-            DEBUGF(__FILE__, __LINE__, "got a hostname: %s\n", conf->hostname);
+                conf->hostname = strdup(val);
+                DEBUGF(__FILE__, __LINE__, "got a hostname: %s\n", conf->hostname);
+            } else if (key[2] == 'i') {
+                /* hide this file! */
+                if (conf->hide_cnt < SRV_CACHE_MAX)
+                    conf->hide[conf->hide_cnt++] = strdup(val);
+            }
             break;
 
         case 'j':

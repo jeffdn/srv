@@ -11,6 +11,7 @@
 #define SRV_PORT_MAX     64
 #define SRV_MODULE_MAX   16
 #define SRV_HANDLER_MAX  128
+#define SRV_CACHE_MAX     512
 
 #define SRV_HANDLER_FILE  0
 #define SRV_HANDLER_DIR   1
@@ -39,6 +40,8 @@ typedef struct {
     /* chroot boolean */
     unsigned int chroot;
 
+    unsigned int hide_cnt;
+    char *hide[SRV_CACHE_MAX];
     char *hostname;
     char *docroot;
     char *index;

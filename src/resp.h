@@ -6,6 +6,8 @@
 #ifndef SRV_RESP_H
 #define SRV_RESP_H
 
+#include <time.h>
+
 #include <util/hash.h>
 
 #include <srv/req.h>
@@ -78,14 +80,21 @@ typedef struct _resp_t {
     size_t headlen;
     size_t senthead;
     size_t len;
+    
+    /* should we cache? */
+    unsigned int cache;
+    //time_t st_mtime;
 
-    /* if we pregenerate content */
+    /* if we pregenerate/cache content */
     unsigned int pregen;
     char *data;
 } resp_t;
 
+/* pregenerate a 404 */
+void srv_resp_403(resp_t *);
 /* generate a response from a request */
 int srv_resp_generate(resp_t *, const char *, const char *,
-                      const char *, struct req_param *, unsigned int, hash_t *);
+                      const char *, struct req_param *, unsigned int, 
+                      hash_t *, hash_t *);
 
 #endif

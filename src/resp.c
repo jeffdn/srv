@@ -116,11 +116,10 @@ typedef struct _file_t {
 char *srv_build_dir_index(const char *, file_t *, unsigned int);
 
 /* srv responses */
-void srv_resp_403(resp_t * resp, const char *date)
+void srv_resp_403(resp_t * resp)
 {
 #ifdef DEBUG
     assert(NULL != resp);
-    assert(NULL != date);
 #endif
 
     resp->code = RESP_HTTP_403;
@@ -131,7 +130,6 @@ void srv_resp_403(resp_t * resp, const char *date)
     snprintf(resp->header, sizeof resp->header,
              "HTTP/1.1 %s %s\r\n"
              "Connection: close\r\n"
-             "Date: %s\r\n"
              "Server: srv/0.1.1\r\n"
              "Content-Length: %lu\r\n"
              "Content-Type: %s\r\n"
@@ -139,10 +137,10 @@ void srv_resp_403(resp_t * resp, const char *date)
              "\r\n",
              resp_status[RESP_HTTP_403][0],
              resp_status[RESP_HTTP_403][1],
-             date, (long unsigned)resp->len, mime_types[resp->type][1]);
+             (long unsigned)resp->len, mime_types[resp->type][1]);
 }
 
-void srv_resp_404(resp_t * resp, const char *date)
+void srv_resp_404(resp_t * resp)
 {
 #ifdef DEBUG
     assert(NULL != resp);
@@ -157,7 +155,6 @@ void srv_resp_404(resp_t * resp, const char *date)
     snprintf(resp->header, sizeof resp->header,
              "HTTP/1.1 %s %s\r\n"
              "Connection: close\r\n"
-             "Date: %s\r\n"
              "Server: srv/0.1.1\r\n"
              "Content-Length: %lu\r\n"
              "Content-Type: %s\r\n"
@@ -165,7 +162,7 @@ void srv_resp_404(resp_t * resp, const char *date)
              "\r\n",
              resp_status[RESP_HTTP_404][0],
              resp_status[RESP_HTTP_404][1],
-             date, (long unsigned)resp->len, mime_types[resp->type][1]);
+             (long unsigned)resp->len, mime_types[resp->type][1]);
 }
 
 /**
@@ -338,11 +335,12 @@ void srv_filelist_free(file_t * list, unsigned int cnt)
 int srv_resp_generate(resp_t * resp, const char *root,
                       const char *req, const char *index,
                       struct req_param *params, unsigned int param_cnt,
-                      hash_t * mps)
+                      hash_t * hide, hash_t * mps)
 {
     struct stat st, ind;
     file_t *list;
 
+    resp_t *cache;
     struct _modfunc *mf;
     unsigned int res, cnt;
     unsigned int i, size;
@@ -399,7 +397,7 @@ int srv_resp_generate(resp_t * resp, const char *root,
                      (long unsigned)resp->len, mime_types[resp->type][1]);
         } else {
             /* TODO: gotta add error handling */
-            srv_resp_404(resp, date);
+            srv_resp_404(resp);
         }
 
         return 1;
@@ -409,15 +407,34 @@ int srv_resp_generate(resp_t * resp, const char *root,
         /* something happened */
         switch (errno) {
         case EACCES:
-            srv_resp_403(resp, date);
+            srv_resp_403(resp);
             free(path);
             return 1;
 
         default:
-            srv_resp_404(resp, date);
+            srv_resp_404(resp);
             free(path);
             return 1;
         }
+    }
+
+    /* check if this file is cached, and if so, what's the deal */
+    if (NULL != (cache = (resp_t *)hash_get(hide, path))) {
+        if (RESP_HTTP_403 == cache->code) {
+            /* we're done! */
+            resp = cache;
+            free(path);
+            return 1;
+        //} else if (st.st_mtime > cache->st_mtime) {
+            /* been updated since last cache */
+#if 0
+            /* TODO: */
+            srv_resp_cache_update(cache, path); */
+            resp = cache;
+            free(path);
+            return 1;
+#endif      
+        }   
     }
 
     if (S_ISDIR(st.st_mode)) {

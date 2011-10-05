@@ -49,10 +49,18 @@ struct _workunit {
 
 /* our global config */
 static conf_t conf;
+
 /* the pool of connections */
 static conn_t pool[SRV_CONN_MAX];
+
 /* thread pool */
 static tpool_t tp;
+
+/* pregenerated 403 response */
+static resp_t _resp403;
+/* list of hidden files and folders */
+static hash_t cache;
+
 /* list of paths and the module to execute with */
 static hash_t mps;
 /* modules */
@@ -348,7 +356,7 @@ int srv_conn_req_ready(conn_t * clnt)
     /* got rid of allocation */
     if (!srv_resp_generate(&clnt->resp, conf.docroot,
                            clnt->req.path, conf.index, clnt->req.params,
-                           clnt->req.param_cnt, &mps)) {
+                           clnt->req.param_cnt, &cache, &mps)) {
         /* couldn't build the response? */
         ERRF(__FILE__, __LINE__, "error generating response.\n");
         return 0;
@@ -581,18 +589,42 @@ int main(int argc, char *argv[])
         }
     }
 
-    /* set up our hashtable */
+    /* set up our hashtables */
     hash_init(&mps, SRV_MODULE_MAX);
+    hash_init(&cache, SRV_CACHE_MAX);
 
     /* key functions... basic string type */
     hash_set_keycmp(&mps, hash_default_keycmp);
     hash_set_keycpy(&mps, hash_default_keycpy);
     hash_set_free_key(&mps, hash_default_free_key);
+    hash_set_keycmp(&cache, hash_default_keycmp);
+    hash_set_keycpy(&cache, hash_default_keycpy);
+    hash_set_free_key(&cache, hash_default_free_key);
 
     /* val functions... pointer into module array */
     hash_set_valcmp(&mps, srv_modhash_valcmp);
     hash_set_valcpy(&mps, srv_modhash_alloc);
     hash_set_free_val(&mps, srv_modhash_free);
+
+#if 0 /* soon... */
+    hash_set_valcmp(&cache, srv_cache_valcmp);
+    hash_set_valcpy(&cache, srv_cache_valcpy);
+    hash_set_free_val(&cache, hash_default_free_key);
+#endif 
+
+    /* set up our hidden and cached files. we set it up
+     * so that hidden files, which 403, are treated as cached
+     * files with the html served up being the preprocessor
+     * strings defined in resp.h
+     */
+
+    /* first the pregenerated 404 response */
+    srv_resp_403(&_resp403);
+
+    for (i = 0; i < conf.hide_cnt; ++i) {
+        hash_insert(&cache, conf.hide[i], &_resp403);
+        DEBUGF(__FILE__, __LINE__, "hid file %s!\n", conf.hide[i]);
+    }
 
     /* set up our modules, insert paths into hashtable */
     for (i = 0; i < conf.mod_cnt; ++i) {
