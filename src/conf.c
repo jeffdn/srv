@@ -25,8 +25,8 @@ int srv_conf_check_block(regex_t * r, const char *buf, char *key, size_t size)
     if (!regexec(r, buf, sizeof res / sizeof res[0], res, 0)) {
         /* it is, lets pull the name */
         strncpy(key, buf + res[1].rm_so,
-                ((unsigned)(res[1].rm_eo - res[1].rm_so) < size) ?
-                (unsigned)res[1].rm_eo - res[1].rm_so : size);
+                ((size_t)(res[1].rm_eo - res[1].rm_so) < size) ?
+                (size_t)res[1].rm_eo - res[1].rm_so : size);
 
         return 1;
     }
@@ -48,12 +48,12 @@ int srv_conf_parse_line(regex_t * r, const char *buf, char *key,
     if (!regexec(r, buf, sizeof res / sizeof res[0], res, 0)) {
         /* we found a match */
         strncpy(key, buf + res[1].rm_so,
-                ((unsigned)(res[1].rm_eo - res[1].rm_so) < size) ?
-                (unsigned)res[1].rm_eo - res[1].rm_so : size);
+                ((size_t)(res[1].rm_eo - res[1].rm_so) < size) ?
+                (size_t)res[1].rm_eo - res[1].rm_so : size);
 
         strncpy(val, buf + res[2].rm_so,
-                ((unsigned)(res[2].rm_eo - res[2].rm_so) < size) ?
-                (unsigned)res[2].rm_eo - res[2].rm_so : size);
+                ((size_t)(res[2].rm_eo - res[2].rm_so) < size) ?
+                (size_t)res[2].rm_eo - res[2].rm_so : size);
     } else {
         /* no match */
         return 0;
