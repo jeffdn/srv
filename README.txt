@@ -4,5 +4,13 @@ Jeff Nettleton
 jeffdn@gmail.com
 
 This is an event-based, threaded HTTP server that is intended to address the C10k
-problem. Has many of the standard webserver features, like /index.html,
-protection against ../ snooping, as well as modular capabilities. More to come.
+problem. Has support for many of the standard webserver features, including:
+
+ - directory listing, where allowed
+ - protection from ../ path snooping
+ - directories prefixed with . are hidden
+ - ability to hide any folder (appears as 404)
+ - /index.html in any folder
+ - chroot user jails, with user and group switching (requires root)
+ - basic support for modules that perform custom actions
+ - ability to run on multiple ports at once
