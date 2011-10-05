@@ -33,7 +33,7 @@ module_t *module_new(const char *name, const char *path)
     assert(NULL != path);
 #endif
 
-    module = malloc(sizeof *module);
+    module = calloc(1, sizeof *module);
     if (NULL == module) {
         ERRF(__FILE__, __LINE__, "allocating for a new module!\n");
         return NULL;
@@ -61,11 +61,11 @@ int module_init(module_t * module, const char *name, const char *path)
     module->name = strdup(name);
 
 #ifdef WIN32
-    module->path = malloc(strlen(path) + strlen(name) + 6);
+    module->path = calloc(1, strlen(path) + strlen(name) + 6);
     snprintf(module->path, strlen(path) + strlen(name) + 6, "%s/%s.dll",
              path, name);
 #else
-    module->path = malloc(strlen(path) + strlen(name) + 5);
+    module->path = calloc(1, strlen(path) + strlen(name) + 5);
     snprintf(module->path, strlen(path) + strlen(name) + 5, "%s/%s.so",
              path, name);
 #endif

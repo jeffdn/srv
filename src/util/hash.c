@@ -19,7 +19,7 @@
  */
 hash_t *hash_new(unsigned int slots)
 {
-    hash_t *ht = malloc(sizeof *ht);
+    hash_t *ht = calloc(1, sizeof *ht);
 
     if (NULL == ht) {
         ERRF(__FILE__, __LINE__, "allocating memory for new hash_t!\n");
@@ -53,13 +53,11 @@ void hash_init(hash_t * ht, unsigned int slots)
     ht->count = 0;
     ht->unique = 0;
 
-    ht->data = malloc(ht->slots * sizeof *ht->data);
+    ht->data = calloc(ht->slots, sizeof *ht->data);
     if (NULL == ht->data) {
         ERRF(__FILE__, __LINE__, "allocating memory for new hash_entry_t!\n");
         exit(1);
     }
-
-    memset(ht->data, '\0', ht->slots * sizeof *ht->data);
 }
 
 /**
@@ -160,7 +158,7 @@ int hash_insert(hash_t * ht, const void *key, const void *val)
         ht->unique++;
     }
 
-    he = malloc(sizeof *he);
+    he = calloc(1, sizeof *he);
     if (NULL == he) {
         ERRF(__FILE__, __LINE__,
              "allocating memory for a new hash_entry_t struct!\n");

@@ -26,7 +26,7 @@ char **strsplit(const char *str, const char *delim, unsigned int max,
 #endif
 
     copy = strdup(str);
-    strings = malloc(max * sizeof *strings);
+    strings = calloc(max, sizeof *strings);
 
     if (NULL == strings) {
         ERRF(__FILE__, __LINE__, "allocating for string array!\n");
@@ -68,7 +68,7 @@ char *strjoin(const char **words, const char *joiner, unsigned int cnt)
 
     newlen += strlen(joiner) * (cnt - 1);
 
-    newstr = malloc(newlen);
+    newstr = calloc(1, newlen);
 
     if (NULL == newstr) {
         ERRF(__FILE__, __LINE__, "allocating for a new string!\n");
@@ -103,7 +103,7 @@ char *strsubstr(const char *str, unsigned int length, int offset)
             length = -1 * offset;
     }
 
-    new = malloc(length + 1);    /* may not be this long, but this is the max */
+    new = calloc(1, length + 1);    /* may not be this long, but this is the max */
 
     if (NULL == new) {
         ERRF(__FILE__, __LINE__, "allocating in strsubstr!\n");

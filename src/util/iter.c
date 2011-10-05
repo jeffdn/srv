@@ -21,7 +21,7 @@ hash_iter_t *hash_iter_new(hash_t * ht)
 {
     hash_iter_t *iter;
 
-    iter = malloc(sizeof *iter);
+    iter = calloc(1, sizeof *iter);
     if (NULL == iter) {
         ERRF(__FILE__, __LINE__, "allocating for a new hash iterator!\n");
         exit(1);
@@ -210,7 +210,7 @@ vector_iter_t *vector_iter_new(vector_t * vec)
 {
     vector_iter_t *iter;
 
-    iter = malloc(sizeof *iter);
+    iter = calloc(1, sizeof *iter);
     if (NULL == iter) {
         ERRF(__FILE__, __LINE__, "allocating for a new vector iterator!\n");
         exit(1);

@@ -145,7 +145,7 @@ unsigned int srv_req_parse(req_t * req)
 
                 /* slightly tricksy */
                 req->params[req->param_cnt].key =
-                    malloc((strlen(pm) + 1) - strlen(tmp));
+                    calloc(1, strlen(pm) + 1) - strlen(tmp));
                 snprintf(req->params[req->param_cnt].key,
                          (int)((strlen(pm) + 1) - strlen(tmp)),
                          "%.*s", (int)(strlen(pm) - strlen(tmp)), pm);

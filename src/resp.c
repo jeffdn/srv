@@ -279,7 +279,7 @@ file_t *srv_list_dir(const char *dir, unsigned int *cnt)
     }
 
     *cnt = i;
-    list = malloc(sizeof *list * *cnt);
+    list = calloc(*cnt, sizeof *list);
 
     if (NULL == list) {
         ERRF(__FILE__, __LINE__, "allocation error!\n");

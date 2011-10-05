@@ -38,7 +38,7 @@ sock_t *sock_new(unsigned int proto, unsigned int type, const char *host,
     assert(proto != 0);
 #endif
 
-    sock = malloc(sizeof *sock);
+    sock = calloc(1, sizeof *sock);
     if (NULL == sock) {
         ERRF(__FILE__, __LINE__, "error allocating memory for new sock!\n");
         return NULL;

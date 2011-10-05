@@ -103,7 +103,7 @@ int srv_modhash_valcmp(const void *a, const void *b)
 
 void *srv_threadpool_alloc(void *arg)
 {
-    struct _workunit *wu = malloc(sizeof *wu);
+    struct _workunit *wu = calloc(1, sizeof *wu);
 
     if (NULL == wu) {
         DEBUGF(__FILE__, __LINE__, "allocation error\n");

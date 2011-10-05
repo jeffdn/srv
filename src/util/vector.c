@@ -18,7 +18,7 @@
  */
 vector_t *vector_new(unsigned int slots, unsigned int size)
 {
-    vector_t *vec = malloc(sizeof *vec);
+    vector_t *vec = calloc(1, sizeof *vec);
 
     if (NULL == vec) {
         ERRF(__FILE__, __LINE__, "allocating for a new vector!\n");
@@ -53,7 +53,7 @@ int vector_init(vector_t * vec, unsigned int slots, unsigned int size)
     vec->size = size;
     vec->count = 0;
 
-    vec->data = malloc(vec->slots * vec->size);
+    vec->data = calloc(1, vec->slots * vec->size);
     if (NULL == vec->data) {
         ERRF(__FILE__, __LINE__,
              "allocating vector data table (slots=%u,size=%u)!\n",

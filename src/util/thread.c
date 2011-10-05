@@ -26,7 +26,7 @@
 /* allocate */
 tpool_t *tpool_create(unsigned int cnt, tfunc controller, tfunc handler)
 {
-    tpool_t *tp = malloc(sizeof *tp);
+    tpool_t *tp = calloc(1, sizeof *tp);
 
     /* set it up */
     if (tp)
@@ -46,7 +46,7 @@ int tpool_init(tpool_t * tp, unsigned int cnt, tfunc controller, tfunc handler)
 #endif
 
     tp->cnt = cnt;
-    tp->pool = malloc(tp->cnt * (sizeof *(tp->pool)));
+    tp->pool = calloc(tp->cnt, sizeof *(tp->pool));
     tp->handler = handler;
     tp->controller = controller;
     tp->jobcount = 0;

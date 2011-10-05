@@ -48,7 +48,7 @@ char *handle_pic(char *name, struct srv_mod_trans *mt,
         return NULL;
     }
 
-    data = malloc(got);
+    data = calloc(1, got);
     memcpy(data, buf, got);
 
     if (NULL == data) {

@@ -57,12 +57,11 @@ char *handle_mre(char *path, struct srv_mod_trans *mt,
         len += strlen(params[i].key) + strlen(params[i].val) + 9;
     }
 
-    data = malloc(len);
+    data = calloc(1, len);
 
     if (NULL == data)
         return NULL;
 
-    memset(data, '\0', len);
     snprintf(data, len, "%s<h3>%s</h3>", HEAD, buf);
 
     for (i = 0; i < cnt; i++) {

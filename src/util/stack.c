@@ -17,7 +17,7 @@ sstack_t *stack_new(void)
 {
     sstack_t *stk;
 
-    stk = malloc(sizeof *stk);
+    stk = calloc(1, sizeof *stk);
     if (NULL == stk) {
         ERRF(__FILE__, __LINE__, "ERROR: allocating for a new stack!\n");
         exit(1);
@@ -73,7 +73,7 @@ void stack_push(sstack_t * stk, void *entry)
     }
 
     if (NULL == stk->node) {
-        stk->node = malloc(sizeof *(stk->node));
+        stk->node = calloc(1, sizeof *(stk->node));
         if (NULL == stk->node) {
             ERRF(__FILE__, __LINE__,
                  "ERROR: allocating for a new stack node!\n");
@@ -85,7 +85,7 @@ void stack_push(sstack_t * stk, void *entry)
         stk->node->data = tmp;
         stk->first = stk->node;
     } else {
-        node = malloc(sizeof *node);
+        node = calloc(1, sizeof *node);
         if (NULL == node) {
             ERRF(__FILE__, __LINE__,
                  "ERROR: allocating for a new stack node!\n");
