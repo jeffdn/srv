@@ -57,7 +57,7 @@ static conn_t pool[SRV_CONN_MAX];
 static tpool_t tp;
 
 /* pregenerated 403 response */
-static resp_t _resp403;
+static resp_t rp[SRV_CACHE_MAX];
 /* list of hidden files and folders */
 static hash_t cache;
 
@@ -236,10 +236,6 @@ void *srv_threadpool_controller(void *arg)
 			for (i = 0; i < tp.cnt; i++) {
 				/* find an available thread */
 				if (!tp.pool[i].busy) {
-					/* got one */
-					DEBUGF(__FILE__, __LINE__,
-						   "(thread:%d) taking a job...\n", tp.pool[i].id);
-
 					/* assign work, unlock mutex */
 					tp.pool[i].job = wu->fd;
 					free(wu);
@@ -247,7 +243,8 @@ void *srv_threadpool_controller(void *arg)
 
 					/* pull the trigger */
 					pthread_mutex_unlock(&tp.pool[i].mt);
-					break;
+					
+                    break;
 				}
 			}
 
@@ -632,10 +629,10 @@ int main(int argc, char *argv[])
 	 */
 
 	/* first the pregenerated 404 response */
-	srv_resp_403(&_resp403);
+	srv_resp_403(&rp[0]);
 
 	for (i = 0; i < conf.hide_cnt; ++i) {
-		hash_insert(&cache, conf.hide[i], &_resp403);
+		hash_insert(&cache, conf.hide[i], &rp[0]);
 		DEBUGF(__FILE__, __LINE__, "hid file %s!\n", conf.hide[i]);
 	}
 

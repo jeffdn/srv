@@ -97,6 +97,7 @@ struct _respptr {
 
 /* pregenerate a 404 */
 void srv_resp_403(resp_t *);
+void srv_resp_404(resp_t *);
 /* generate/update a resp_t for a cached object */
 int srv_resp_cache(resp_t *, const char *);
 /* generate a response from a request */
