@@ -60,41 +60,47 @@
 
 typedef void *dlptr_t;
 typedef char *(*_srv_modfunc_t) (char *,
-                                 struct srv_mod_trans *, struct req_param *,
-                                 unsigned int);
+								 struct srv_mod_trans *, struct req_param *,
+								 unsigned int);
 
 struct _modfunc {
-    dlptr_t mod;
-    _srv_modfunc_t func;
-    char path[256];
+	dlptr_t mod;
+	_srv_modfunc_t func;
+	char path[256];
 };
 
 typedef struct _resp_t {
-    /* how much have we sent */
-    size_t pos;
+	/* how much have we sent */
+	size_t pos;
 
-    unsigned int code;
-    char *file;
-    unsigned int type;
-    char header[256];
-    size_t headlen;
-    size_t senthead;
-    size_t len;
-    
-    /* should we cache? */
-    unsigned int cache;
-    //time_t st_mtime;
+	unsigned int code;
+	char *file;
+	unsigned int type;
+	char header[256];
+	size_t headlen;
+	size_t senthead;
+	size_t len;
 
-    /* if we pregenerate/cache content */
-    unsigned int pregen;
-    char *data;
+	/* should we cache? */
+	unsigned int cache;
+	time_t mtime;
+
+	/* if we pregenerate/cache content */
+	unsigned int pregen;
+	char *data;
 } resp_t;
+
+/* pointer to a resp_t */
+struct _respptr {
+	resp_t *r;
+};
 
 /* pregenerate a 404 */
 void srv_resp_403(resp_t *);
+/* generate/update a resp_t for a cached object */
+int srv_resp_cache(resp_t *, const char *);
 /* generate a response from a request */
 int srv_resp_generate(resp_t *, const char *, const char *,
-                      const char *, struct req_param *, unsigned int, 
-                      hash_t *, hash_t *);
-
+					  const char *, struct req_param *, unsigned int,
+					  hash_t *, hash_t *);
 #endif

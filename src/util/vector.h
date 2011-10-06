@@ -7,11 +7,11 @@
 #define UTIL_VECTOR_H
 
 typedef struct _vector_t {
-    unsigned int count;
-    unsigned int slots;
-    unsigned int size;
+	unsigned int count;
+	unsigned int slots;
+	unsigned int size;
 
-    void *data;
+	void *data;
 } vector_t;
 
 /* create a new vector */

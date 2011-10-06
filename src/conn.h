@@ -22,18 +22,18 @@
 #define CONN_STATE_DESTROY  0
 
 typedef struct _conn_t {
-    int sock;
-    struct sockaddr_in addr;
-    unsigned int locked;
-    unsigned int state;
+	int sock;
+	struct sockaddr_in addr;
+	unsigned int locked;
+	unsigned int state;
 
-    /* our file */
-    int fd;
+	/* our file */
+	int fd;
 
-    /* client only */
-    struct event ev;
-    req_t req;
-    resp_t resp;
+	/* client only */
+	struct event ev;
+	req_t req;
+	resp_t resp;
 } conn_t;
 
 /* intialize a connection */

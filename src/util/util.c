@@ -18,17 +18,17 @@
  */
 void ERRF(const char *file, unsigned int line, const char *format, ...)
 {
-    va_list ap;
+	va_list ap;
 
 #ifdef DEUBG
-    assert(NULL != file);
-    assert(NULL != format);
+	assert(NULL != file);
+	assert(NULL != format);
 #endif
 
-    va_start(ap, format);
-    fprintf(stderr, "%s:%u - ERROR: ", file, line);
-    vfprintf(stderr, format, ap);
-    va_end(ap);
+	va_start(ap, format);
+	fprintf(stderr, "%s:%u - ERROR: ", file, line);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
 }
 
 /**
@@ -41,14 +41,14 @@ void ERRF(const char *file, unsigned int line, const char *format, ...)
 void DEBUGF(const char *file, unsigned int line, const char *format, ...)
 {
 #ifdef DEBUG
-    va_list ap;
+	va_list ap;
 
-    assert(NULL != file);
-    assert(NULL != format);
+	assert(NULL != file);
+	assert(NULL != format);
 
-    va_start(ap, format);
-    fprintf(stderr, "%s:%u - DEBUG: ", file, line);
-    vfprintf(stderr, format, ap);
-    va_end(ap);
+	va_start(ap, format);
+	fprintf(stderr, "%s:%u - DEBUG: ", file, line);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
 #endif
 }

@@ -14,26 +14,26 @@
 typedef void *(*tfunc) (void *);
 
 struct _worker_t {
-    int id, busy;
-    pthread_t th;
-    pthread_mutex_t mt;
-    int job;
+	int id, busy;
+	pthread_t th;
+	pthread_mutex_t mt;
+	int job;
 };
 
 typedef struct _tpool_t {
-    struct _worker_t boss;
-    struct _worker_t *pool;
-    unsigned int cnt;
-    unsigned int jobcount;
+	struct _worker_t boss;
+	struct _worker_t *pool;
+	unsigned int cnt;
+	unsigned int jobcount;
 
-    /* controller function */
-    tfunc controller;
-    /* handler function */
-    tfunc handler;
+	/* controller function */
+	tfunc controller;
+	/* handler function */
+	tfunc handler;
 
-    /* stack and mutex shield */
-    pthread_mutex_t mutex;
-    sstack_t work;
+	/* stack and mutex shield */
+	pthread_mutex_t mutex;
+	sstack_t work;
 } tpool_t;
 
 /* allocate */

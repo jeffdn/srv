@@ -39,24 +39,24 @@ typedef int SOCKET;
 #define sock_ip(s)          ((s)->ip)
 
 typedef struct _sock_t {
-    unsigned int type;
-    unsigned int proto;
+	unsigned int type;
+	unsigned int proto;
 
-    /* local vars */
-    unsigned short port;
-    char *host;
-    char ip[16];
-    struct sockaddr_in addr;
-    SOCKET sock;
+	/* local vars */
+	unsigned short port;
+	char *host;
+	char ip[16];
+	struct sockaddr_in addr;
+	SOCKET sock;
 
-    unsigned int connected;
+	unsigned int connected;
 } sock_t;
 
 /* create a new listening socket */
 sock_t *sock_new(unsigned int, unsigned int, const char *, unsigned short);
 /* initialise an allocated sock */
 int sock_init(sock_t *, unsigned int, unsigned int, const char *,
-              unsigned short);
+			  unsigned short);
 /* choose what kind of socket we're having */
 int sock_create(sock_t *);
 /* accept an incoming connection */

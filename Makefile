@@ -3,8 +3,12 @@
 all: srv
 
 dirs:
-	mkdir -p lib/
-	mkdir -p include/{srv,util}/
+	if [ ! -d lib/ ]; then \
+	    mkdir -p lib/;     \
+    fi
+	if [ ! -d include/ ]; then        \
+	    mkdir -p include/{srv,util}/; \
+	fi
 	cp src/*.h include/srv/
 	cp src/util/*.h include/util/
 
