@@ -1,4 +1,4 @@
-# srv
+
 
 all: srv
 
@@ -31,5 +31,5 @@ clean:
 	make -C mods clean
 	make -C test clean
 	make -C src clean
-	rm -f *.o lib/*.so
+	rm -f *.o lib/mod_*.so
 	rm -f include/{srv,util}/*.h
