@@ -461,13 +461,14 @@ int srv_resp_generate(resp_t * resp, const char *root,
 			return 1;
 		}
 	}
-#if 0
-	/* check if this file is cached, and if so, what's the deal */
+	
+    /* check if this file is cached, and if so, what's the deal */
 	if (NULL != (pt = (struct _respptr *)hash_get(hide, path))) {
 		/* get the goodies */
-		cache = pt->r;
-
-		if (RESP_HTTP_403 == cache->code) {
+		resp = pt->r;
+		
+#if 0
+        if (RESP_HTTP_403 == cache->code) {
 			/* we're done! */
 			fprintf(stderr, "zoom!\n");
 			resp = cache;
@@ -485,8 +486,9 @@ int srv_resp_generate(resp_t * resp, const char *root,
 			free(path);
 			return 1;
 		}
-	}
 #endif
+
+    }
 
 	if (S_ISDIR(st.st_mode)) {
 		ind_path = srv_fix_req_path(path, (char *)index);
@@ -649,7 +651,9 @@ char *srv_build_dir_index(const char *dir, file_t * list, unsigned int cnt)
 			 "    <th colspan=\"5\"><hr></th>\n"
 			 "   </tr>\n"
 			 "  </table>\n"
-			 "  <address>server powered by srv 0.1.1</address>\n"
+			 "  <address>server powered by srv-"
+             _SRV_VERSION
+             "  </address>\n"
 			 " </body>\n" "</html>\n");
 	strcat(buf, ent);
 

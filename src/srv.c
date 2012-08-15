@@ -577,8 +577,9 @@ int main(int argc, char *argv[])
 	}
 
 	/* dump a bunch of startup info */
-	printf("srv 0.1.1\n");
-	printf("copyright (c) 2007, 2011\n");
+	printf("srv %d.%d.%d\n", _SRV_MAJOR, _SRV_MINOR, _SRV_REV);
+#ifdef DEBUG
+    printf("copyright (c) 2007, 2011\n");
 	printf("jeff nettleton\n");
 	printf("jeffdn@gmail.com\n\n");
 	printf("  port(s):  ");
@@ -593,8 +594,8 @@ int main(int argc, char *argv[])
 	printf("  index:     %s\n", conf.index);
 	printf("  hostname:  %s\n", conf.hostname);
 	printf("  chroot:    %s\n", (conf.chroot) ? "yes" : "no");
-
-	/* if we're running as root... */
+	
+    /* if we're running as root... */
 	if (conf.chroot) {
 		printf("  user:      %s\n", conf.user);
 		printf("  group:     %s\n", conf.group);
@@ -606,6 +607,23 @@ int main(int argc, char *argv[])
 		printf("%s ", conf.mods[i].name);
 
 	printf("%s\n", (conf.mod_cnt) ? " " : "none");
+#else
+    printf("running in quiet mode...\n");
+#endif
+
+#if 0
+    /* a misguided attempt at making it fork and detach... no reason */
+    if (!fork()) {
+        /* we are the chosen one! */
+        close(0);
+        close(1);
+        close(2);
+        setsid();
+    } else {
+        /* buh bye. */
+        exit(0);
+    }
+#endif
 
 	/* initialize libevent */
 	event_init();
@@ -765,10 +783,11 @@ int main(int argc, char *argv[])
 			}
 		} else {
 			fprintf(stderr,
-					"i'm running as root, but you haven't provided a\n"
-					"non-root user and group to switch to.  this is\n"
-					"insecure, so set the variables 'user' and 'group'\n"
-					"in the config file. thanks!\n");
+					"i'm currently running as root, but you haven't provided\n"
+					"a non-root username and group to switch to. this is not\n"
+					"secure, so please choose a less priveliged username and\n"
+					"group to use, then change srv.conf accordingly. thanks!\n");
+            ERRF(__FILE__, __LINE__, "chroot without user switch.\n");
 			return 1;
 		}
 	}

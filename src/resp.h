@@ -32,9 +32,16 @@
 #include <srv/req.h>
 #include <srv/mod.h>
 
-#define RESP_HTTP_200     2
-#define RESP_HTTP_403    19
-#define RESP_HTTP_404    20
+/* our versioning stuff */
+#define _SRV_MAJOR            0
+#define _SRV_MINOR            1
+#define _SRV_REV              1
+#define _SRV_VERSION     "0.1.1"
+
+/* supported HTTP response codes */
+#define RESP_HTTP_200         2
+#define RESP_HTTP_403        19
+#define RESP_HTTP_404        20
 
 #define RESP_403_HTML                                           \
     "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""\
@@ -53,7 +60,9 @@
     "   <tr>"                                                   \
     "    <th colspan=\"5\"><hr></th>"                           \
     "   </tr>"                                                  \
-    "  <address>server powered by srv 0.1.1</address>"          \
+    "  <address>server powered by srv-"                         \
+    _SRV_VERSION                                                \
+    "   </address>"                                             \
     " </body>"                                                  \
     "</html>"
 
@@ -73,7 +82,9 @@
     "   <tr>"                                                   \
     "    <th colspan=\"5\"><hr></th>"                           \
     "   </tr>"                                                  \
-    "  <address>server powered by srv 0.1.1</address>"          \
+    "  <address>server powered by srv-"                         \
+    _SRV_VERSION                                                \
+    "   </address>"                                             \
     " </body>"                                                  \
     "</html>"
 
