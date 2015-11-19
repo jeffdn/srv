@@ -38,16 +38,16 @@
  */
 hash_t *hash_new(unsigned int slots)
 {
-	hash_t *ht = calloc(1, sizeof *ht);
+    hash_t *ht = calloc(1, sizeof *ht);
 
-	if (NULL == ht) {
-		ERRF(__FILE__, __LINE__, "allocating memory for new hash_t!\n");
-		return NULL;
-	}
+    if (NULL == ht) {
+        ERRF(__FILE__, __LINE__, "allocating memory for new hash_t!\n");
+        return NULL;
+    }
 
-	hash_init(ht, slots);
+    hash_init(ht, slots);
 
-	return ht;
+    return ht;
 }
 
 /**
@@ -58,25 +58,25 @@ hash_t *hash_new(unsigned int slots)
 void hash_init(hash_t * ht, unsigned int slots)
 {
 #ifdef DEBUG
-	assert(NULL != ht);
+    assert(NULL != ht);
 #endif
 
-	/* for now, we comment this out.  I need to come up with a better way
-	 * to round the slots, and this kind of sucks.  But whatever...we'll
-	 * just take whatever the user provides.
-	 *
-	 * ht->slots = (unsigned int) ceil (sqrt (slots) * log (slots));
-	 */
+    /* for now, we comment this out.  I need to come up with a better way
+     * to round the slots, and this kind of sucks.  But whatever...we'll
+     * just take whatever the user provides.
+     *
+     * ht->slots = (unsigned int) ceil (sqrt (slots) * log (slots));
+     */
 
-	ht->slots = slots;
-	ht->count = 0;
-	ht->unique = 0;
+    ht->slots = slots;
+    ht->count = 0;
+    ht->unique = 0;
 
-	ht->data = calloc(ht->slots, sizeof *ht->data);
-	if (NULL == ht->data) {
-		ERRF(__FILE__, __LINE__, "allocating memory for new hash_entry_t!\n");
-		exit(1);
-	}
+    ht->data = calloc(ht->slots, sizeof *ht->data);
+    if (NULL == ht->data) {
+        ERRF(__FILE__, __LINE__, "allocating memory for new hash_entry_t!\n");
+        exit(1);
+    }
 }
 
 /**
@@ -85,44 +85,44 @@ void hash_init(hash_t * ht, unsigned int slots)
  */
 int hash_resize(hash_t * ht)
 {
-	hash_entry_t **tmp, *he;
-	unsigned int index, slots;
+    hash_entry_t **tmp, *he;
+    unsigned int index, slots;
 
 #ifdef DEBUG
-	assert(NULL != ht);
+    assert(NULL != ht);
 #endif
 
-	tmp = ht->data;
-	ht->data = NULL;
-	slots = ht->slots;
+    tmp = ht->data;
+    ht->data = NULL;
+    slots = ht->slots;
 
-	hash_init(ht, slots * 2);
+    hash_init(ht, slots * 2);
 
-	/* tmp retains the proper pointer for now */
-	for (index = 0; index < slots; index++) {
-		if (NULL != (he = tmp[index])) {
-			while (NULL != he) {
-				/* insert into new data table */
-				hash_insert(ht, he->key, he->val);
+    /* tmp retains the proper pointer for now */
+    for (index = 0; index < slots; index++) {
+        if (NULL != (he = tmp[index])) {
+            while (NULL != he) {
+                /* insert into new data table */
+                hash_insert(ht, he->key, he->val);
 
-				ht->free_key(he->key);
-				ht->free_val(he->val);
+                ht->free_key(he->key);
+                ht->free_val(he->val);
 
-				/* "remove" the entry from the linked list */
-				if (NULL != he->next) {
-					tmp[index] = he->next;
-					free(he);
-					he = tmp[index];
-				} else {
-					free(he);
-					he = tmp[index] = NULL;
-				}
-			}
-		}
-	}
+                /* "remove" the entry from the linked list */
+                if (NULL != he->next) {
+                    tmp[index] = he->next;
+                    free(he);
+                    he = tmp[index];
+                } else {
+                    free(he);
+                    he = tmp[index] = NULL;
+                }
+            }
+        }
+    }
 
-	free(tmp);
-	return 1;
+    free(tmp);
+    return 1;
 }
 
 /**
@@ -133,67 +133,67 @@ int hash_resize(hash_t * ht)
  */
 int hash_insert(hash_t * ht, const void *key, const void *val)
 {
-	hash_entry_t *he;
-	unsigned int hash, index;
+    hash_entry_t *he;
+    unsigned int hash, index;
 
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != key);
-	assert(NULL != val);
+    assert(NULL != ht);
+    assert(NULL != key);
+    assert(NULL != val);
 #endif
 
-	if (NULL == ht->keycpy || NULL == ht->valcpy) {
-		ERRF(__FILE__, __LINE__,
-			 "key/value copying functions are not set properly!\n");
-		return 0;
-	}
+    if (NULL == ht->keycpy || NULL == ht->valcpy) {
+        ERRF(__FILE__, __LINE__,
+             "key/value copying functions are not set properly!\n");
+        return 0;
+    }
 
-	if (ht->count >= ht->slots) {
-		/* we're out of space ! */
-		if (!hash_resize(ht)) {
-			/* that sucks... errors allocating */
-			return 0;
-		}
-	}
+    if (ht->count >= ht->slots) {
+        /* we're out of space ! */
+        if (!hash_resize(ht)) {
+            /* that sucks... errors allocating */
+            return 0;
+        }
+    }
 
-	hash = hash_func(key);
-	index = hash % ht->slots;
+    hash = hash_func(key);
+    index = hash % ht->slots;
 
-	if (NULL != (he = ht->data[index])) {
-		DEBUGF(__FILE__, __LINE__, "got a duplicate...\n");
+    if (NULL != (he = ht->data[index])) {
+        DEBUGF(__FILE__, __LINE__, "got a duplicate...\n");
 
-		while (NULL != he) {
-			if (!ht->keycmp(key, he->key)) {
-				/* keys match. free value, and copy new one */
-				ht->free_val(he->val);
-				he->val = ht->valcpy(val);
+        while (NULL != he) {
+            if (!ht->keycmp(key, he->key)) {
+                /* keys match. free value, and copy new one */
+                ht->free_val(he->val);
+                he->val = ht->valcpy(val);
 
-				return 1;
-			}
+                return 1;
+            }
 
-			he = he->next;
-		}
-	} else {
-		ht->unique++;
-	}
+            he = he->next;
+        }
+    } else {
+        ht->unique++;
+    }
 
-	he = calloc(1, sizeof *he);
-	if (NULL == he) {
-		ERRF(__FILE__, __LINE__,
-			 "allocating memory for a new hash_entry_t struct!\n");
-		exit(1);
-	}
+    he = calloc(1, sizeof *he);
+    if (NULL == he) {
+        ERRF(__FILE__, __LINE__,
+             "allocating memory for a new hash_entry_t struct!\n");
+        exit(1);
+    }
 
-	he->key = ht->keycpy(key);
-	he->val = ht->valcpy(val);
+    he->key = ht->keycpy(key);
+    he->val = ht->valcpy(val);
 
-	/* do some linked list hax */
-	he->next = ht->data[index];
-	ht->data[index] = he;
+    /* do some linked list hax */
+    he->next = ht->data[index];
+    ht->data[index] = he;
 
-	++ht->count;
+    ++ht->count;
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -203,29 +203,29 @@ int hash_insert(hash_t * ht, const void *key, const void *val)
  */
 void *hash_get(hash_t * ht, const void *key)
 {
-	unsigned int hash, index;
-	hash_entry_t *he;
+    unsigned int hash, index;
+    hash_entry_t *he;
 
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != key);
+    assert(NULL != ht);
+    assert(NULL != key);
 #endif
 
-	hash = hash_func(key);
-	index = hash % ht->slots;
+    hash = hash_func(key);
+    index = hash % ht->slots;
 
-	if (NULL != (he = ht->data[index])) {
-		while (NULL != he) {
-			if (!ht->keycmp(key, he->key)) {
-				/* k they are equal */
-				return he->val;
-			}
+    if (NULL != (he = ht->data[index])) {
+        while (NULL != he) {
+            if (!ht->keycmp(key, he->key)) {
+                /* k they are equal */
+                return he->val;
+            }
 
-			he = he->next;
-		}
-	}
+            he = he->next;
+        }
+    }
 
-	return NULL;
+    return NULL;
 }
 
 /**
@@ -235,9 +235,9 @@ void *hash_get(hash_t * ht, const void *key)
  */
 int _hash_delete_foreach(const void *key, void *userptr)
 {
-	hash_delete(userptr, key);
+    hash_delete(userptr, key);
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -247,42 +247,42 @@ int _hash_delete_foreach(const void *key, void *userptr)
  */
 int hash_delete(hash_t * ht, const void *key)
 {
-	unsigned int hash, index;
-	hash_entry_t *he;
+    unsigned int hash, index;
+    hash_entry_t *he;
 
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != key);
+    assert(NULL != ht);
+    assert(NULL != key);
 #endif
 
-	hash = hash_func(key);
-	index = hash % ht->slots;
+    hash = hash_func(key);
+    index = hash % ht->slots;
 
-	if (NULL != (he = ht->data[index])) {
-		while (NULL != he) {
-			if (!ht->keycmp(key, he->key)) {
-				/* k they are equal */
-				ht->free_key(he->key);
-				ht->free_val(he->val);
+    if (NULL != (he = ht->data[index])) {
+        while (NULL != he) {
+            if (!ht->keycmp(key, he->key)) {
+                /* k they are equal */
+                ht->free_key(he->key);
+                ht->free_val(he->val);
 
-				/* "remove" the entry from the linked list */
-				if (he->next) {
-					ht->data[index] = he->next;
-					free(he);
-				} else {
-					free(he);
-					ht->data[index] = NULL;
-				}
+                /* "remove" the entry from the linked list */
+                if (he->next) {
+                    ht->data[index] = he->next;
+                    free(he);
+                } else {
+                    free(he);
+                    ht->data[index] = NULL;
+                }
 
-				--ht->count;
-				return 1;
-			}
+                --ht->count;
+                return 1;
+            }
 
-			he = he->next;
-		}
-	}
+            he = he->next;
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -292,40 +292,40 @@ int hash_delete(hash_t * ht, const void *key)
  * @param userptr the additional argument the user can pass (can be NULL)
  */
 int hash_foreach(hash_t * ht, int (*foreach) (const void *, void *),
-				 void *userptr)
+                 void *userptr)
 {
-	unsigned int i;
-	hash_entry_t *he;
+    unsigned int i;
+    hash_entry_t *he;
 
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != foreach);
+    assert(NULL != ht);
+    assert(NULL != foreach);
 #endif
 
-	if (NULL == foreach) {
-		/* erm, pointless to execute this function... */
-		return 0;
-	}
+    if (NULL == foreach) {
+        /* erm, pointless to execute this function... */
+        return 0;
+    }
 
-	for (i = 0; i < ht->slots; i++) {
-		if (NULL != (he = ht->data[i])) {
-			while (NULL != he) {
-				if (!foreach(he->key, userptr)) {
-					/* I might change this. If the foreach () function
-					 * that the user passes returns 0, do we REALLY want
-					 * to exit, or are we just going to ignore this value?
-					 * For now, I'm going to have it return 0, but I may
-					 * very well change this.
-					 */
-					return 0;
-				}
+    for (i = 0; i < ht->slots; i++) {
+        if (NULL != (he = ht->data[i])) {
+            while (NULL != he) {
+                if (!foreach(he->key, userptr)) {
+                    /* I might change this. If the foreach () function
+                     * that the user passes returns 0, do we REALLY want
+                     * to exit, or are we just going to ignore this value?
+                     * For now, I'm going to have it return 0, but I may
+                     * very well change this.
+                     */
+                    return 0;
+                }
 
-				he = he->next;
-			}
-		}
-	}
+                he = he->next;
+            }
+        }
+    }
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -334,14 +334,14 @@ int hash_foreach(hash_t * ht, int (*foreach) (const void *, void *),
  */
 unsigned int hash_func(const void *str)
 {
-	char *c;
-	register unsigned int h = 5381;
+    char *c;
+    register unsigned int h = 5381;
 
-	for (c = (char *)str; *c != '\0'; c++) {
-		h = (h + (h << 5)) + *c;
-	}
+    for (c = (char *)str; *c != '\0'; c++) {
+        h = (h + (h << 5)) + *c;
+    }
 
-	return h;
+    return h;
 }
 
 /**
@@ -351,23 +351,23 @@ unsigned int hash_func(const void *str)
 void hash_destroy(hash_t * ht)
 {
 #ifdef DEBUG
-	assert(NULL != ht);
+    assert(NULL != ht);
 #endif
 
-	hash_clear(ht);
+    hash_clear(ht);
 
-	free(ht->data);
+    free(ht->data);
 
-	ht->count = 0;
-	ht->slots = 0;
-	ht->unique = 0;
+    ht->count = 0;
+    ht->slots = 0;
+    ht->unique = 0;
 
-	ht->keycmp = NULL;
-	ht->valcmp = NULL;
-	ht->keycpy = NULL;
-	ht->valcpy = NULL;
-	ht->free_key = NULL;
-	ht->free_val = NULL;
+    ht->keycmp = NULL;
+    ht->valcmp = NULL;
+    ht->keycpy = NULL;
+    ht->valcpy = NULL;
+    ht->free_key = NULL;
+    ht->free_val = NULL;
 }
 
 /**
@@ -376,8 +376,8 @@ void hash_destroy(hash_t * ht)
  */
 void hash_free(hash_t * ht)
 {
-	hash_destroy(ht);
-	free(ht);
+    hash_destroy(ht);
+    free(ht);
 }
 
 /**
@@ -387,10 +387,10 @@ void hash_free(hash_t * ht)
  */
 int _hash_dup_foreach(const void *key, void *pair)
 {
-	hash_insert(*((hash_t **) pair) + 1, key,
-				hash_get(*((hash_t **) pair), key));
+    hash_insert(*((hash_t **) pair) + 1, key,
+                hash_get(*((hash_t **) pair), key));
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -399,16 +399,16 @@ int _hash_dup_foreach(const void *key, void *pair)
  */
 hash_t *hash_dup(hash_t * ht)
 {
-	hash_t *copy, *pair[2];
+    hash_t *copy, *pair[2];
 
-	copy = hash_new(ht->slots);
+    copy = hash_new(ht->slots);
 
-	pair[0] = ht;
-	pair[1] = copy;
+    pair[0] = ht;
+    pair[1] = copy;
 
-	hash_foreach(ht, _hash_dup_foreach, pair);
+    hash_foreach(ht, _hash_dup_foreach, pair);
 
-	return copy;
+    return copy;
 }
 
 /**
@@ -419,11 +419,11 @@ hash_t *hash_dup(hash_t * ht)
 void hash_set_keycmp(hash_t * ht, int (*keycmp) (const void *, const void *))
 {
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != keycmp);
+    assert(NULL != ht);
+    assert(NULL != keycmp);
 #endif
 
-	ht->keycmp = keycmp;
+    ht->keycmp = keycmp;
 }
 
 /**
@@ -434,11 +434,11 @@ void hash_set_keycmp(hash_t * ht, int (*keycmp) (const void *, const void *))
 void hash_set_valcmp(hash_t * ht, int (*valcmp) (const void *, const void *))
 {
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != valcmp);
+    assert(NULL != ht);
+    assert(NULL != valcmp);
 #endif
 
-	ht->valcmp = valcmp;
+    ht->valcmp = valcmp;
 }
 
 /**
@@ -449,11 +449,11 @@ void hash_set_valcmp(hash_t * ht, int (*valcmp) (const void *, const void *))
 void hash_set_keycpy(hash_t * ht, void *(*keycpy) (const void *))
 {
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != keycpy);
+    assert(NULL != ht);
+    assert(NULL != keycpy);
 #endif
 
-	ht->keycpy = keycpy;
+    ht->keycpy = keycpy;
 }
 
 /**
@@ -464,11 +464,11 @@ void hash_set_keycpy(hash_t * ht, void *(*keycpy) (const void *))
 void hash_set_valcpy(hash_t * ht, void *(*valcpy) (const void *))
 {
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != valcpy);
+    assert(NULL != ht);
+    assert(NULL != valcpy);
 #endif
 
-	ht->valcpy = valcpy;
+    ht->valcpy = valcpy;
 }
 
 /**
@@ -479,11 +479,11 @@ void hash_set_valcpy(hash_t * ht, void *(*valcpy) (const void *))
 void hash_set_free_key(hash_t * ht, void (*free_key) (void *))
 {
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != free_key);
+    assert(NULL != ht);
+    assert(NULL != free_key);
 #endif
 
-	ht->free_key = free_key;
+    ht->free_key = free_key;
 }
 
 /**
@@ -494,11 +494,11 @@ void hash_set_free_key(hash_t * ht, void (*free_key) (void *))
 void hash_set_free_val(hash_t * ht, void (*free_val) (void *))
 {
 #ifdef DEBUG
-	assert(NULL != ht);
-	assert(NULL != free_val);
+    assert(NULL != ht);
+    assert(NULL != free_val);
 #endif
 
-	ht->free_val = free_val;
+    ht->free_val = free_val;
 }
 
 /**
@@ -508,12 +508,12 @@ void hash_set_free_val(hash_t * ht, void (*free_val) (void *))
  */
 int hash_default_keycmp(const void *key, const void *str)
 {
-	if (!strncmp((char *)key, (char *)str, strlen((char *)key))) {
-		/* key and string are equal, true */
-		return 0;
-	}
+    if (!strncmp((char *)key, (char *)str, strlen((char *)key))) {
+        /* key and string are equal, true */
+        return 0;
+    }
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -523,12 +523,12 @@ int hash_default_keycmp(const void *key, const void *str)
  */
 int hash_default_valcmp(const void *val, const void *str)
 {
-	if (!strncmp((char *)val, (char *)str, strlen((char *)val))) {
-		/* value and string are equal, true */
-		return 0;
-	}
+    if (!strncmp((char *)val, (char *)str, strlen((char *)val))) {
+        /* value and string are equal, true */
+        return 0;
+    }
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -537,14 +537,14 @@ int hash_default_valcmp(const void *val, const void *str)
  */
 void *hash_default_keycpy(const void *key)
 {
-	char *tmp;
+    char *tmp;
 
-	if (NULL == (tmp = strdup((char *)key))) {
-		ERRF(__FILE__, __LINE__, "strdup() in hash_default_keycpy!\n");
-		return NULL;
-	}
+    if (NULL == (tmp = strdup((char *)key))) {
+        ERRF(__FILE__, __LINE__, "strdup() in hash_default_keycpy!\n");
+        return NULL;
+    }
 
-	return tmp;
+    return tmp;
 }
 
 /**
@@ -553,14 +553,14 @@ void *hash_default_keycpy(const void *key)
  */
 void *hash_default_valcpy(const void *val)
 {
-	char *tmp;
+    char *tmp;
 
-	if (NULL == (tmp = strdup((char *)val))) {
-		ERRF(__FILE__, __LINE__, "strdup() in hash_default_valcpy!\n");
-		return NULL;
-	}
+    if (NULL == (tmp = strdup((char *)val))) {
+        ERRF(__FILE__, __LINE__, "strdup() in hash_default_valcpy!\n");
+        return NULL;
+    }
 
-	return tmp;
+    return tmp;
 }
 
 /**
@@ -569,9 +569,9 @@ void *hash_default_valcpy(const void *val)
  */
 void hash_default_free_key(void *key)
 {
-	if (NULL != key) {
-		free(key);
-	}
+    if (NULL != key) {
+        free(key);
+    }
 }
 
 /**
@@ -580,9 +580,9 @@ void hash_default_free_key(void *key)
  */
 void hash_default_free_val(void *val)
 {
-	if (NULL != val) {
-		free(val);
-	}
+    if (NULL != val) {
+        free(val);
+    }
 }
 
 /**
@@ -591,12 +591,12 @@ void hash_default_free_val(void *val)
  */
 hash_t *hash_new_string(unsigned int slots)
 {
-	hash_t *ht;
+    hash_t *ht;
 
-	ht = hash_new(slots);
-	hash_init_string(ht, slots);
+    ht = hash_new(slots);
+    hash_init_string(ht, slots);
 
-	return ht;
+    return ht;
 }
 
 /**
@@ -606,12 +606,12 @@ hash_t *hash_new_string(unsigned int slots)
  */
 void hash_init_string(hash_t * ht, unsigned int slots)
 {
-	hash_init(ht, slots);
+    hash_init(ht, slots);
 
-	hash_set_keycpy(ht, hash_default_keycpy);
-	hash_set_valcpy(ht, hash_default_valcpy);
-	hash_set_keycmp(ht, hash_default_keycmp);
-	hash_set_valcmp(ht, hash_default_valcmp);
-	hash_set_free_key(ht, hash_default_free_key);
-	hash_set_free_val(ht, hash_default_free_val);
+    hash_set_keycpy(ht, hash_default_keycpy);
+    hash_set_valcpy(ht, hash_default_valcpy);
+    hash_set_keycmp(ht, hash_default_keycmp);
+    hash_set_valcmp(ht, hash_default_valcmp);
+    hash_set_free_key(ht, hash_default_free_key);
+    hash_set_free_val(ht, hash_default_free_val);
 }

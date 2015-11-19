@@ -40,12 +40,12 @@ typedef void *funcptr_t;
 #endif
 
 typedef struct _module_t {
-	char *name;
-	char *path;
+    char *name;
+    char *path;
 
-	/* weeee! */
-	dlptr_t module;
-	unsigned int loaded;
+    /* weeee! */
+    dlptr_t module;
+    unsigned int loaded;
 } module_t;
 
 /* create a new module */

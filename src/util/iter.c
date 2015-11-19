@@ -38,17 +38,17 @@
  */
 hash_iter_t *hash_iter_new(hash_t * ht)
 {
-	hash_iter_t *iter;
+    hash_iter_t *iter;
 
-	iter = calloc(1, sizeof *iter);
-	if (NULL == iter) {
-		ERRF(__FILE__, __LINE__, "allocating for a new hash iterator!\n");
-		exit(1);
-	}
+    iter = calloc(1, sizeof *iter);
+    if (NULL == iter) {
+        ERRF(__FILE__, __LINE__, "allocating for a new hash iterator!\n");
+        exit(1);
+    }
 
-	hash_iter_init(iter, ht);
+    hash_iter_init(iter, ht);
 
-	return iter;
+    return iter;
 }
 
 /**
@@ -59,18 +59,18 @@ hash_iter_t *hash_iter_new(hash_t * ht)
 void hash_iter_init(hash_iter_t * iter, hash_t * ht)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
-	assert(NULL != ht);
+    assert(NULL != iter);
+    assert(NULL != ht);
 #endif
 
-	iter->pos = 0;
-	iter->depth = 0;
-	iter->ht = ht;
-	iter->he = NULL;
-	iter->first = NULL;
-	iter->second = NULL;
+    iter->pos = 0;
+    iter->depth = 0;
+    iter->ht = ht;
+    iter->he = NULL;
+    iter->first = NULL;
+    iter->second = NULL;
 
-	hash_iter_next(iter);
+    hash_iter_next(iter);
 }
 
 /**
@@ -80,40 +80,40 @@ void hash_iter_init(hash_iter_t * iter, hash_t * ht)
 int hash_iter_next(hash_iter_t * iter)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	if (NULL != iter->he) {
-		if (NULL != iter->he->next) {
-			/* there was a collision */
-			iter->he = iter->he->next;
+    if (NULL != iter->he) {
+        if (NULL != iter->he->next) {
+            /* there was a collision */
+            iter->he = iter->he->next;
 
-			iter->first = iter->he->key;
-			iter->second = iter->he->val;
+            iter->first = iter->he->key;
+            iter->second = iter->he->val;
 
-			++iter->depth;
+            ++iter->depth;
 
-			return 1;
-		} else {
-			/* move up one... */
-			++iter->pos;
-		}
-	}
+            return 1;
+        } else {
+            /* move up one... */
+            ++iter->pos;
+        }
+    }
 
-	/* reset the depth */
-	iter->depth = 0;
+    /* reset the depth */
+    iter->depth = 0;
 
-	for (; iter->pos < iter->ht->slots; iter->pos++) {
-		if (NULL != (iter->he = iter->ht->data[iter->pos])) {
-			/* we hit an allocated entry... */
-			iter->first = iter->he->key;
-			iter->second = iter->he->val;
+    for (; iter->pos < iter->ht->slots; iter->pos++) {
+        if (NULL != (iter->he = iter->ht->data[iter->pos])) {
+            /* we hit an allocated entry... */
+            iter->first = iter->he->key;
+            iter->second = iter->he->val;
 
-			return 1;
-		}
-	}
+            return 1;
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -122,41 +122,41 @@ int hash_iter_next(hash_iter_t * iter)
  */
 int hash_iter_prev(hash_iter_t * iter)
 {
-	unsigned int i;
+    unsigned int i;
 
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	if (hash_iter_begin(iter)) {
-		/* already at the beginning */
-		return 0;
-	}
+    if (hash_iter_begin(iter)) {
+        /* already at the beginning */
+        return 0;
+    }
 
-	if (iter->depth > 0) {
-		for (iter->he = iter->ht->data[iter->pos], i = 0; i < iter->depth; i++) {
-			/* descend to one level below where we are now */
-			iter->he = iter->he->next;
-		}
+    if (iter->depth > 0) {
+        for (iter->he = iter->ht->data[iter->pos], i = 0; i < iter->depth; i++) {
+            /* descend to one level below where we are now */
+            iter->he = iter->he->next;
+        }
 
-		--iter->depth;
-		return 1;
-	}
+        --iter->depth;
+        return 1;
+    }
 
-	for (; iter->pos; iter->pos--) {
-		if (NULL != (iter->he = iter->ht->data[iter->pos])) {
-			while (NULL != iter->he->next) {
-				/* proceed along through the linked list */
-				iter->he = iter->he->next;
+    for (; iter->pos; iter->pos--) {
+        if (NULL != (iter->he = iter->ht->data[iter->pos])) {
+            while (NULL != iter->he->next) {
+                /* proceed along through the linked list */
+                iter->he = iter->he->next;
 
-				++iter->depth;
-			}
+                ++iter->depth;
+            }
 
-			return 1;
-		}
-	}
+            return 1;
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -166,15 +166,15 @@ int hash_iter_prev(hash_iter_t * iter)
 void hash_iter_destroy(hash_iter_t * iter)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	iter->pos = 0;
-	iter->depth = 0;
-	iter->ht = NULL;
-	iter->he = NULL;
-	iter->first = NULL;
-	iter->second = NULL;
+    iter->pos = 0;
+    iter->depth = 0;
+    iter->ht = NULL;
+    iter->he = NULL;
+    iter->first = NULL;
+    iter->second = NULL;
 }
 
 /**
@@ -184,10 +184,10 @@ void hash_iter_destroy(hash_iter_t * iter)
 int hash_iter_begin(hash_iter_t * iter)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	return (!iter->pos) ? 1 : 0;
+    return (!iter->pos) ? 1 : 0;
 }
 
 /**
@@ -196,15 +196,15 @@ int hash_iter_begin(hash_iter_t * iter)
  */
 void hash_iter_reset(hash_iter_t * iter)
 {
-	hash_t *tmp;
+    hash_t *tmp;
 
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	tmp = iter->ht;
-	hash_iter_destroy(iter);
-	hash_iter_init(iter, tmp);
+    tmp = iter->ht;
+    hash_iter_destroy(iter);
+    hash_iter_init(iter, tmp);
 }
 
 /**
@@ -214,11 +214,11 @@ void hash_iter_reset(hash_iter_t * iter)
 void hash_iter_free(hash_iter_t * iter)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	hash_iter_destroy(iter);
-	free(iter);
+    hash_iter_destroy(iter);
+    free(iter);
 }
 
 /**
@@ -227,17 +227,17 @@ void hash_iter_free(hash_iter_t * iter)
  */
 vector_iter_t *vector_iter_new(vector_t * vec)
 {
-	vector_iter_t *iter;
+    vector_iter_t *iter;
 
-	iter = calloc(1, sizeof *iter);
-	if (NULL == iter) {
-		ERRF(__FILE__, __LINE__, "allocating for a new vector iterator!\n");
-		exit(1);
-	}
+    iter = calloc(1, sizeof *iter);
+    if (NULL == iter) {
+        ERRF(__FILE__, __LINE__, "allocating for a new vector iterator!\n");
+        exit(1);
+    }
 
-	vector_iter_init(iter, vec);
+    vector_iter_init(iter, vec);
 
-	return iter;
+    return iter;
 }
 
 /**
@@ -248,15 +248,15 @@ vector_iter_t *vector_iter_new(vector_t * vec)
 void vector_iter_init(vector_iter_t * iter, vector_t * vec)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
-	assert(NULL != vec);
+    assert(NULL != iter);
+    assert(NULL != vec);
 #endif
 
-	iter->pos = 0;
-	iter->vec = vec;
-	iter->data = NULL;
+    iter->pos = 0;
+    iter->vec = vec;
+    iter->data = NULL;
 
-	vector_iter_next(iter);
+    vector_iter_next(iter);
 }
 
 /**
@@ -266,28 +266,28 @@ void vector_iter_init(vector_iter_t * iter, vector_t * vec)
 int vector_iter_next(vector_iter_t * iter)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	if (iter->pos == (iter->vec->count - 1)) {
-		/* at the end */
-		return 0;
-	}
+    if (iter->pos == (iter->vec->count - 1)) {
+        /* at the end */
+        return 0;
+    }
 
-	if (NULL == iter->data && !iter->pos) {
-		/* running for the first time */
-		iter->data = iter->vec->data;
+    if (NULL == iter->data && !iter->pos) {
+        /* running for the first time */
+        iter->data = iter->vec->data;
 
-		return 1;
-	} else {
-		/* lets doo this */
-		++iter->pos;
-		iter->data = (char *)iter->vec->data + (iter->pos * iter->vec->size);
+        return 1;
+    } else {
+        /* lets doo this */
+        ++iter->pos;
+        iter->data = (char *)iter->vec->data + (iter->pos * iter->vec->size);
 
-		return 1;
-	}
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -297,18 +297,18 @@ int vector_iter_next(vector_iter_t * iter)
 int vector_iter_prev(vector_iter_t * iter)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	if (vector_iter_begin(iter)) {
-		/* already at the beginning */
-		return 0;
-	}
+    if (vector_iter_begin(iter)) {
+        /* already at the beginning */
+        return 0;
+    }
 
-	--iter->pos;
-	iter->data = (char *)iter->vec->data + (iter->pos * iter->vec->size);
+    --iter->pos;
+    iter->data = (char *)iter->vec->data + (iter->pos * iter->vec->size);
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -318,12 +318,12 @@ int vector_iter_prev(vector_iter_t * iter)
 void vector_iter_destroy(vector_iter_t * iter)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	iter->pos = 0;
-	iter->data = NULL;
-	iter->vec = NULL;
+    iter->pos = 0;
+    iter->data = NULL;
+    iter->vec = NULL;
 }
 
 /**
@@ -333,10 +333,10 @@ void vector_iter_destroy(vector_iter_t * iter)
 int vector_iter_begin(vector_iter_t * iter)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	return (!iter->pos) ? 1 : 0;
+    return (!iter->pos) ? 1 : 0;
 }
 
 /**
@@ -345,15 +345,15 @@ int vector_iter_begin(vector_iter_t * iter)
  */
 void vector_iter_reset(vector_iter_t * iter)
 {
-	vector_t *tmp;
+    vector_t *tmp;
 
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	tmp = iter->vec;
-	vector_iter_destroy(iter);
-	vector_iter_init(iter, tmp);
+    tmp = iter->vec;
+    vector_iter_destroy(iter);
+    vector_iter_init(iter, tmp);
 }
 
 /**
@@ -363,9 +363,9 @@ void vector_iter_reset(vector_iter_t * iter)
 void vector_iter_free(vector_iter_t * iter)
 {
 #ifdef DEBUG
-	assert(NULL != iter);
+    assert(NULL != iter);
 #endif
 
-	vector_iter_destroy(iter);
-	free(iter);
+    vector_iter_destroy(iter);
+    free(iter);
 }

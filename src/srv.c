@@ -57,7 +57,7 @@
 #define SRV_CONN_MAX  128
 
 struct _workunit {
-	int fd;
+    int fd;
 };
 
 #if 0
@@ -106,68 +106,68 @@ int srv_conn_send_file(conn_t *);
 
 void *srv_cache_alloc(const void *arg)
 {
-	struct _respptr *pt = calloc(1, sizeof *pt);
+    struct _respptr *pt = calloc(1, sizeof *pt);
 
-	if (NULL != pt)
-		pt->r = (resp_t *) arg;
+    if (NULL != pt)
+        pt->r = (resp_t *) arg;
 
-	return (void *)pt;
+    return (void *)pt;
 }
 
 void srv_cache_free(void *a)
 {
-	struct _respptr *pt = (struct _respptr *)a;
-	pt->r = NULL;
+    struct _respptr *pt = (struct _respptr *)a;
+    pt->r = NULL;
 }
 
 int srv_cache_valcmp(const void *a, const void *b)
 {
-	resp_t *r1 = ((struct _respptr *)a)->r;
-	resp_t *r2 = ((struct _respptr *)b)->r;
+    resp_t *r1 = ((struct _respptr *)a)->r;
+    resp_t *r2 = ((struct _respptr *)b)->r;
 
-	return (!strncmp(r1->file, r2->file, strlen(r1->file))) ? 0 : 1;
+    return (!strncmp(r1->file, r2->file, strlen(r1->file))) ? 0 : 1;
 }
 
 void *srv_modhash_alloc(const void *arg)
 {
-	struct _modfunc *mf = (struct _modfunc *)arg;
+    struct _modfunc *mf = (struct _modfunc *)arg;
 
-	return (void *)mf;
+    return (void *)mf;
 }
 
 void srv_modhash_free(void *a)
 {
-	struct _modfunc *mf = (struct _modfunc *)a;
+    struct _modfunc *mf = (struct _modfunc *)a;
 
-	mf->mod = NULL;
-	mf->func = NULL;
-	memset(mf->path, '\0', sizeof mf->path);
+    mf->mod = NULL;
+    mf->func = NULL;
+    memset(mf->path, '\0', sizeof mf->path);
 }
 
 int srv_modhash_valcmp(const void *a, const void *b)
 {
-	struct _modfunc *mfa = (struct _modfunc *)a;
-	struct _modfunc *mfb = (struct _modfunc *)b;
+    struct _modfunc *mfa = (struct _modfunc *)a;
+    struct _modfunc *mfb = (struct _modfunc *)b;
 
-	return (mfa->func == mfb->func) ? 0 : 1;
+    return (mfa->func == mfb->func) ? 0 : 1;
 }
 
 void *srv_threadpool_alloc(void *arg)
 {
-	struct _workunit *wu = calloc(1, sizeof *wu);
+    struct _workunit *wu = calloc(1, sizeof *wu);
 
-	if (NULL == wu) {
-		DEBUGF(__FILE__, __LINE__, "allocation error\n");
-		return NULL;
-	}
+    if (NULL == wu) {
+        DEBUGF(__FILE__, __LINE__, "allocation error\n");
+        return NULL;
+    }
 
-	/* either set value, or empty */
-	if (NULL != arg)
-		wu->fd = (int)arg;
-	else
-		wu->fd = 0;
+    /* either set value, or empty */
+    if (NULL != arg)
+        wu->fd = (int)arg;
+    else
+        wu->fd = 0;
 
-	return (void *)wu;
+    return (void *)wu;
 }
 
 /**
@@ -175,55 +175,55 @@ void *srv_threadpool_alloc(void *arg)
  */
 void srv_accept_new_conn(int fd, short ev, void *arg)
 {
-	int tmp_sock, y = 1;
-	struct sockaddr_in tmp_addr;
-	socklen_t socklen;
-	conn_t *clnt;
+    int tmp_sock, y = 1;
+    struct sockaddr_in tmp_addr;
+    socklen_t socklen;
+    conn_t *clnt;
 
-	/* accept the connection */
-	socklen = sizeof tmp_addr;
-	if ((tmp_sock = accept(fd, (struct sockaddr *)&tmp_addr, &socklen)) == -1) {
-		ERRF(__FILE__, __LINE__, "accepting conn: %s, %d!\n",
-			 strerror(errno), fd);
-		return;
-	}
+    /* accept the connection */
+    socklen = sizeof tmp_addr;
+    if ((tmp_sock = accept(fd, (struct sockaddr *)&tmp_addr, &socklen)) == -1) {
+        ERRF(__FILE__, __LINE__, "accepting conn: %s, %d!\n",
+             strerror(errno), fd);
+        return;
+    }
 
-	if (tmp_sock >= (signed)sizeof pool) {
-		/* too many concurrent connections */
-		ERRF(__FILE__, __LINE__, "accepting conn: too many!\n");
-		close(tmp_sock);
-		return;
-	}
+    if (tmp_sock >= (signed)sizeof pool) {
+        /* too many concurrent connections */
+        ERRF(__FILE__, __LINE__, "accepting conn: too many!\n");
+        close(tmp_sock);
+        return;
+    }
 
-	/* make the socket non-blocking */
-	if (fcntl(tmp_sock, F_SETFL, O_NONBLOCK) == -1) {
-		/* failure */
-		ERRF(__FILE__, __LINE__, "non blocking: %s!\n", strerror(errno));
-		close(tmp_sock);
-		return;
-	}
+    /* make the socket non-blocking */
+    if (fcntl(tmp_sock, F_SETFL, O_NONBLOCK) == -1) {
+        /* failure */
+        ERRF(__FILE__, __LINE__, "non blocking: %s!\n", strerror(errno));
+        close(tmp_sock);
+        return;
+    }
 
-	/* unset TCP_NODELAY, because that makes shit slower for sends */
+    /* unset TCP_NODELAY, because that makes shit slower for sends */
 #ifdef TCP_CORK
-	if (setsockopt(tmp_sock, IPPROTO_TCP, TCP_CORK, &y, sizeof y) == -1) {
-		/* couldn't set TCP_CORK */
-		ERRF(__FILE__, __LINE__, "cork: %s!\n", strerror(errno));
-		close(tmp_sock);
-		return;
-	}
+    if (setsockopt(tmp_sock, IPPROTO_TCP, TCP_CORK, &y, sizeof y) == -1) {
+        /* couldn't set TCP_CORK */
+        ERRF(__FILE__, __LINE__, "cork: %s!\n", strerror(errno));
+        close(tmp_sock);
+        return;
+    }
 #endif
 
-	/* set up the clnt shit */
-	clnt = &pool[tmp_sock];
-	clnt->sock = tmp_sock;
-	memcpy(&clnt->addr, &tmp_addr, sizeof clnt->addr);
+    /* set up the clnt shit */
+    clnt = &pool[tmp_sock];
+    clnt->sock = tmp_sock;
+    memcpy(&clnt->addr, &tmp_addr, sizeof clnt->addr);
 
-	clnt->state = CONN_STATE_REQ;
+    clnt->state = CONN_STATE_REQ;
 
-	/* notify when ready to read request */
-	event_set(&clnt->ev, clnt->sock,
-			  EV_READ | EV_PERSIST, srv_conn_handle_activity, NULL);
-	event_add(&clnt->ev, NULL);
+    /* notify when ready to read request */
+    event_set(&clnt->ev, clnt->sock,
+              EV_READ | EV_PERSIST, srv_conn_handle_activity, NULL);
+    event_add(&clnt->ev, NULL);
 }
 
 /**
@@ -231,124 +231,124 @@ void srv_accept_new_conn(int fd, short ev, void *arg)
  */
 void srv_conn_handle_activity(int fd, short ev, void *arg)
 {
-	event_del(&pool[fd].ev);
-	tpool_add_work(&tp, (void *)fd);
+    event_del(&pool[fd].ev);
+    tpool_add_work(&tp, (void *)fd);
 }
 
 /* threadpool controller */
 void *srv_threadpool_controller(void *arg)
 {
-	unsigned int i;
-	struct _worker_t *w;
-	struct _workunit *wu;
+    unsigned int i;
+    struct _worker_t *w;
+    struct _workunit *wu;
 
-	w = &tp.boss;
+    w = &tp.boss;
 
-	for (;;) {
-		wu = NULL;
+    for (;;) {
+        wu = NULL;
 
-		/* block until there is work */
-		pthread_mutex_lock(&w->mt);
+        /* block until there is work */
+        pthread_mutex_lock(&w->mt);
 
-		while (NULL != (wu = tpool_get_work(&tp))) {
-			/* there is a pending job */
-			for (i = 0; i < tp.cnt; i++) {
-				/* find an available thread */
-				if (!tp.pool[i].busy) {
-					/* assign work, unlock mutex */
-					tp.pool[i].job = wu->fd;
-					free(wu);
-					wu = NULL;
+        while (NULL != (wu = tpool_get_work(&tp))) {
+            /* there is a pending job */
+            for (i = 0; i < tp.cnt; i++) {
+                /* find an available thread */
+                if (!tp.pool[i].busy) {
+                    /* assign work, unlock mutex */
+                    tp.pool[i].job = wu->fd;
+                    free(wu);
+                    wu = NULL;
 
-					/* pull the trigger */
-					pthread_mutex_unlock(&tp.pool[i].mt);
-					
+                    /* pull the trigger */
+                    pthread_mutex_unlock(&tp.pool[i].mt);
+                    
                     break;
-				}
-			}
+                }
+            }
 
-			if (tp.cnt == i) {
-				/* there were no available threads, throw back on stack */
-				tpool_add_work(&tp, (void *)wu->fd);
-				free(wu);
-				wu = NULL;
-			}
-		}
-	}
+            if (tp.cnt == i) {
+                /* there were no available threads, throw back on stack */
+                tpool_add_work(&tp, (void *)wu->fd);
+                free(wu);
+                wu = NULL;
+            }
+        }
+    }
 
-	return NULL;
+    return NULL;
 }
 
 /* threadpool handler thread for all threads in the pool */
 void *srv_threadpool_handler(void *arg)
 {
-	struct _worker_t *w;
-	conn_t *clnt;
+    struct _worker_t *w;
+    conn_t *clnt;
 
-	/* who am i? */
-	w = &tp.pool[(int)arg];
+    /* who am i? */
+    w = &tp.pool[(int)arg];
 
-	/* infinite loop */
-	for (;;) {
-		/* block until we have work */
-		pthread_mutex_lock(&w->mt);
+    /* infinite loop */
+    for (;;) {
+        /* block until we have work */
+        pthread_mutex_lock(&w->mt);
 
-		/* let's do this */
-		w->busy = 1;
+        /* let's do this */
+        w->busy = 1;
 
-		if (w->job) {
-			clnt = &pool[w->job];
+        if (w->job) {
+            clnt = &pool[w->job];
 
-			if (CONN_STATE_REQ == clnt->state) {
-				if (!srv_conn_req_ready(clnt)) {
-					ERRF(__FILE__, __LINE__, "reading request!\n");
-					srv_conn_cleanup(clnt);
-				} else {
-					/* notify when ready to read request */
-					event_set(&clnt->ev, clnt->sock,
-							  EV_WRITE | EV_PERSIST,
-							  srv_conn_handle_activity, NULL);
-					event_add(&clnt->ev, NULL);
-				}
-			} else if (CONN_STATE_RESP == clnt->state) {
-				/* ready to send the HTTP response to the client */
-				if (!srv_conn_resp_ready(clnt)) {
-					DEBUGF(__FILE__, __LINE__,
-						   "(sock:%d) problem with sending response!\n",
-						   clnt->sock);
-					srv_conn_cleanup(clnt);
-				}
+            if (CONN_STATE_REQ == clnt->state) {
+                if (!srv_conn_req_ready(clnt)) {
+                    ERRF(__FILE__, __LINE__, "reading request!\n");
+                    srv_conn_cleanup(clnt);
+                } else {
+                    /* notify when ready to read request */
+                    event_set(&clnt->ev, clnt->sock,
+                              EV_WRITE | EV_PERSIST,
+                              srv_conn_handle_activity, NULL);
+                    event_add(&clnt->ev, NULL);
+                }
+            } else if (CONN_STATE_RESP == clnt->state) {
+                /* ready to send the HTTP response to the client */
+                if (!srv_conn_resp_ready(clnt)) {
+                    DEBUGF(__FILE__, __LINE__,
+                           "(sock:%d) problem with sending response!\n",
+                           clnt->sock);
+                    srv_conn_cleanup(clnt);
+                }
 
-				/* ready to send our data to the client */
-				if (!clnt->resp.pregen) {
-					/* sending a file */
-					if (!srv_conn_send_file(clnt)) {
-						DEBUGF(__FILE__, __LINE__,
-							   "(sock:%d) problem sending file!\n", clnt->sock);
-					}
-				} else {
-					/* sending pregenerated data, i.e. dir listing */
-					if (!srv_conn_send_pregen(clnt)) {
-						DEBUGF(__FILE__, __LINE__,
-							   "(sock:%d) problem sending pregen!\n",
-							   clnt->sock);
-					}
-				}
+                /* ready to send our data to the client */
+                if (!clnt->resp.pregen) {
+                    /* sending a file */
+                    if (!srv_conn_send_file(clnt)) {
+                        DEBUGF(__FILE__, __LINE__,
+                               "(sock:%d) problem sending file!\n", clnt->sock);
+                    }
+                } else {
+                    /* sending pregenerated data, i.e. dir listing */
+                    if (!srv_conn_send_pregen(clnt)) {
+                        DEBUGF(__FILE__, __LINE__,
+                               "(sock:%d) problem sending pregen!\n",
+                               clnt->sock);
+                    }
+                }
 
-				/* and we're done! */
-				srv_conn_cleanup(clnt);
-			} else {
-				/* and we're done! */
-				srv_conn_cleanup(clnt);
-			}
-		}
+                /* and we're done! */
+                srv_conn_cleanup(clnt);
+            } else {
+                /* and we're done! */
+                srv_conn_cleanup(clnt);
+            }
+        }
 
-		w->job = 0;
-		w->busy = 0;
-		clnt = NULL;
-	}
+        w->job = 0;
+        w->busy = 0;
+        clnt = NULL;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 /**
@@ -356,48 +356,48 @@ void *srv_threadpool_handler(void *arg)
  */
 int srv_conn_req_ready(conn_t * clnt)
 {
-	ssize_t got;
+    ssize_t got;
 
 #ifdef DEBUG
-	assert(NULL != clnt);
+    assert(NULL != clnt);
 #endif
 
-	/* get some more shit */
-	got = recv(clnt->sock, clnt->req.buf, sizeof clnt->req.buf, 0);
+    /* get some more shit */
+    got = recv(clnt->sock, clnt->req.buf, sizeof clnt->req.buf, 0);
 
-	if (got == -1) {
-		/* erreur! */
-		ERRF(__FILE__, __LINE__, "receiving data: %s!\n", strerror(errno));
-		return 0;
-	}
+    if (got == -1) {
+        /* erreur! */
+        ERRF(__FILE__, __LINE__, "receiving data: %s!\n", strerror(errno));
+        return 0;
+    }
 
-	if (sizeof clnt->req.buf == got) {
-		/* request the maximum size? fuck you */
-		ERRF(__FILE__, __LINE__,
-			 "buffer overflow attempt? killing connection.\n");
-		return 0;
-	}
+    if (sizeof clnt->req.buf == got) {
+        /* request the maximum size? fuck you */
+        ERRF(__FILE__, __LINE__,
+             "buffer overflow attempt? killing connection.\n");
+        return 0;
+    }
 
-	/* got rid of allocation */
-	if (!srv_req_parse(&clnt->req)) {
-		/* bad request, disconnect */
-		ERRF(__FILE__, __LINE__, "bad request.\n");
-		return 0;
-	}
+    /* got rid of allocation */
+    if (!srv_req_parse(&clnt->req)) {
+        /* bad request, disconnect */
+        ERRF(__FILE__, __LINE__, "bad request.\n");
+        return 0;
+    }
 
-	/* got rid of allocation */
-	if (!srv_resp_generate(&clnt->resp, conf.docroot,
-						   clnt->req.path, conf.index, clnt->req.params,
-						   clnt->req.param_cnt, &cache, &mps)) {
-		/* couldn't build the response? */
-		ERRF(__FILE__, __LINE__, "error generating response.\n");
-		return 0;
-	}
+    /* got rid of allocation */
+    if (!srv_resp_generate(&clnt->resp, conf.docroot,
+                           clnt->req.path, conf.index, clnt->req.params,
+                           clnt->req.param_cnt, &cache, &mps)) {
+        /* couldn't build the response? */
+        ERRF(__FILE__, __LINE__, "error generating response.\n");
+        return 0;
+    }
 
-	clnt->resp.headlen = strlen(clnt->resp.header);
-	clnt->state = CONN_STATE_RESP;
+    clnt->resp.headlen = strlen(clnt->resp.header);
+    clnt->state = CONN_STATE_RESP;
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -405,41 +405,41 @@ int srv_conn_req_ready(conn_t * clnt)
  */
 int srv_conn_resp_ready(conn_t * clnt)
 {
-	ssize_t sent;
+    ssize_t sent;
 
 #ifdef DEBUG
-	assert(NULL != clnt);
+    assert(NULL != clnt);
 #endif
 
-	if (!(sent = send(clnt->sock, clnt->resp.header, clnt->resp.headlen, 0))) {
-		ERRF(__FILE__, __LINE__, "(sock:%d) sending error...\n", clnt->sock);
-		return 0;
-	} else if (sent == -1) {
-		/* errno is set */
-		switch (errno) {
-		case EAGAIN:
-		case EINTR:
-		case EPIPE:
-		default:
-			/* problem */
-			ERRF(__FILE__, __LINE__,
-				 "(sock:%d) unrecoverable send error", clnt->sock);
-			return 0;
-		}
-	}
+    if (!(sent = send(clnt->sock, clnt->resp.header, clnt->resp.headlen, 0))) {
+        ERRF(__FILE__, __LINE__, "(sock:%d) sending error...\n", clnt->sock);
+        return 0;
+    } else if (sent == -1) {
+        /* errno is set */
+        switch (errno) {
+        case EAGAIN:
+        case EINTR:
+        case EPIPE:
+        default:
+            /* problem */
+            ERRF(__FILE__, __LINE__,
+                 "(sock:%d) unrecoverable send error", clnt->sock);
+            return 0;
+        }
+    }
 
-	/* now lets send the data! */
-	if (!clnt->resp.pregen) {
-		/* we're sending a file */
-		if (!(clnt->fd = open(clnt->resp.file, O_RDONLY))) {
-			ERRF(__FILE__, __LINE__, "opening file for sending!\n");
-			return 0;
-		}
-	}
+    /* now lets send the data! */
+    if (!clnt->resp.pregen) {
+        /* we're sending a file */
+        if (!(clnt->fd = open(clnt->resp.file, O_RDONLY))) {
+            ERRF(__FILE__, __LINE__, "opening file for sending!\n");
+            return 0;
+        }
+    }
 
-	clnt->state = CONN_STATE_SEND;
+    clnt->state = CONN_STATE_SEND;
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -447,45 +447,45 @@ int srv_conn_resp_ready(conn_t * clnt)
  */
 int srv_conn_send_pregen(conn_t * clnt)
 {
-	ssize_t sent;
+    ssize_t sent;
 
 #ifdef DEBUG
-	assert(NULL != clnt);
+    assert(NULL != clnt);
 #endif
 
-	/* send some of the data */
-	while (clnt->resp.pos < clnt->resp.len) {
-		if (!(sent = send(clnt->sock,
-						  &clnt->resp.data[clnt->resp.pos],
-						  clnt->resp.len - clnt->resp.pos, 0))) {
-			/* failure :'( */
-			ERRF(__FILE__, __LINE__, "send: %s!\n", strerror(errno));
-			return 0;
-		} else if (sent == -1) {
-			/* errno is set */
-			switch (errno) {
-			case EAGAIN:
-			case EINTR:
-				/* we'll wait and try again */
-				DEBUGF(__FILE__, __LINE__,
-					   "(sock:%d) minor send issue, retrying\n", clnt->sock);
-				continue;
+    /* send some of the data */
+    while (clnt->resp.pos < clnt->resp.len) {
+        if (!(sent = send(clnt->sock,
+                          &clnt->resp.data[clnt->resp.pos],
+                          clnt->resp.len - clnt->resp.pos, 0))) {
+            /* failure :'( */
+            ERRF(__FILE__, __LINE__, "send: %s!\n", strerror(errno));
+            return 0;
+        } else if (sent == -1) {
+            /* errno is set */
+            switch (errno) {
+            case EAGAIN:
+            case EINTR:
+                /* we'll wait and try again */
+                DEBUGF(__FILE__, __LINE__,
+                       "(sock:%d) minor send issue, retrying\n", clnt->sock);
+                continue;
 
-			case EPIPE:
-			default:
-				/* problem */
-				ERRF(__FILE__, __LINE__, "send: %s!\n", strerror(errno));
-				return 0;
-			}
-		}
+            case EPIPE:
+            default:
+                /* problem */
+                ERRF(__FILE__, __LINE__, "send: %s!\n", strerror(errno));
+                return 0;
+            }
+        }
 
-		/* advance our shit */
-		clnt->resp.pos += sent;
-	}
+        /* advance our shit */
+        clnt->resp.pos += sent;
+    }
 
-	clnt->state = CONN_STATE_DESTROY;
+    clnt->state = CONN_STATE_DESTROY;
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -493,62 +493,62 @@ int srv_conn_send_pregen(conn_t * clnt)
  */
 int srv_conn_send_file(conn_t * clnt)
 {
-	ssize_t sent = 0;
-	ssize_t total = 0;
-	ssize_t bytes = 0;
-	ssize_t count = 0;
-	ssize_t toget = 0;
-	char buf[4096];
+    ssize_t sent = 0;
+    ssize_t total = 0;
+    ssize_t bytes = 0;
+    ssize_t count = 0;
+    ssize_t toget = 0;
+    char buf[4096];
 
 #ifdef DEBUG
-	assert(NULL != clnt);
+    assert(NULL != clnt);
 #endif
 
-	toget = sizeof buf;
-	memset(buf, '\0', sizeof buf);
+    toget = sizeof buf;
+    memset(buf, '\0', sizeof buf);
 
-	while ((bytes = read(clnt->fd, buf, toget))) {
-		while (bytes) {
-			if (!(sent = send(clnt->sock, &buf[count], bytes, 0))) {
-				/* failure :'( */
-				ERRF(__FILE__, __LINE__, "send: failed!\n");
-				return 0;
-			} else if (sent == -1) {
-				/* errno is set */
-				switch (errno) {
-				case EAGAIN:
-				case EINTR:
-					/* back that ass up */
-					continue;
+    while ((bytes = read(clnt->fd, buf, toget))) {
+        while (bytes) {
+            if (!(sent = send(clnt->sock, &buf[count], bytes, 0))) {
+                /* failure :'( */
+                ERRF(__FILE__, __LINE__, "send: failed!\n");
+                return 0;
+            } else if (sent == -1) {
+                /* errno is set */
+                switch (errno) {
+                case EAGAIN:
+                case EINTR:
+                    /* back that ass up */
+                    continue;
 
-				case EPIPE:
-				default:
-					/* problem */
-					ERRF(__FILE__, __LINE__, "send: %s!\n", strerror(errno));
-					return 0;
-				}
-			}
+                case EPIPE:
+                default:
+                    /* problem */
+                    ERRF(__FILE__, __LINE__, "send: %s!\n", strerror(errno));
+                    return 0;
+                }
+            }
 
-			/* subtract the amt we sent */
-			count += sent;
-			bytes -= sent;
-			total += sent;
+            /* subtract the amt we sent */
+            count += sent;
+            bytes -= sent;
+            total += sent;
 
-			toget =
-				((clnt->resp.len - total) >
-				 sizeof buf) ? sizeof buf : clnt->resp.len - total;
-		}
+            toget =
+                ((clnt->resp.len - total) >
+                 sizeof buf) ? sizeof buf : clnt->resp.len - total;
+        }
 
-		/* reset bytes to 0 */
-		memset(buf, '\0', sizeof buf);
-		bytes = count = sent = 0;
-	}
+        /* reset bytes to 0 */
+        memset(buf, '\0', sizeof buf);
+        bytes = count = sent = 0;
+    }
 
-	clnt->state = CONN_STATE_DESTROY;
-	DEBUGF(__FILE__, __LINE__, "(sock:%d) sent %db, made it!\n",
-		   clnt->sock, total);
+    clnt->state = CONN_STATE_DESTROY;
+    DEBUGF(__FILE__, __LINE__, "(sock:%d) sent %db, made it!\n",
+           clnt->sock, total);
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -556,57 +556,57 @@ int srv_conn_send_file(conn_t * clnt)
  */
 int main(int argc, char *argv[])
 {
-	unsigned int i, j;
-	struct passwd *user;
-	struct group *group;
+    unsigned int i, j;
+    struct passwd *user;
+    struct group *group;
 
-	/* lets set our shit up */
-	if (argc > 1) {
-		/* they specified a config */
-		if (!srv_conf_parse(&conf, argv[1])) {
-			/* invalid */
-			ERRF(__FILE__, __LINE__, "invalid config: %s!\n", argv[1]);
-			return 1;
-		}
-	} else {
-		if (!srv_conf_parse(&conf, "srv.conf")) {
-			/* invalid */
-			ERRF(__FILE__, __LINE__, "invalid config: srv.conf!\n");
-			return 1;
-		}
-	}
+    /* lets set our shit up */
+    if (argc > 1) {
+        /* they specified a config */
+        if (!srv_conf_parse(&conf, argv[1])) {
+            /* invalid */
+            ERRF(__FILE__, __LINE__, "invalid config: %s!\n", argv[1]);
+            return 1;
+        }
+    } else {
+        if (!srv_conf_parse(&conf, "srv.conf")) {
+            /* invalid */
+            ERRF(__FILE__, __LINE__, "invalid config: srv.conf!\n");
+            return 1;
+        }
+    }
 
-	/* dump a bunch of startup info */
-	printf("srv %d.%d.%d\n", _SRV_MAJOR, _SRV_MINOR, _SRV_REV);
+    /* dump a bunch of startup info */
+    printf("srv %d.%d.%d\n", _SRV_MAJOR, _SRV_MINOR, _SRV_REV);
 #ifdef DEBUG
     printf("copyright (c) 2007, 2011\n");
-	printf("jeff nettleton\n");
-	printf("jeffdn@gmail.com\n\n");
-	printf("  port(s):  ");
+    printf("jeff nettleton\n");
+    printf("jeffdn@gmail.com\n\n");
+    printf("  port(s):  ");
 
-	for (i = 0; i < conf.port_cnt; i++) {
-		/* all the ports we're on */
-		printf(" %u", conf.ports[i]);
-	}
+    for (i = 0; i < conf.port_cnt; i++) {
+        /* all the ports we're on */
+        printf(" %u", conf.ports[i]);
+    }
 
-	printf("\n");
-	printf("  docroot:   %s\n", conf.docroot);
-	printf("  index:     %s\n", conf.index);
-	printf("  hostname:  %s\n", conf.hostname);
-	printf("  chroot:    %s\n", (conf.chroot) ? "yes" : "no");
-	
+    printf("\n");
+    printf("  docroot:   %s\n", conf.docroot);
+    printf("  index:     %s\n", conf.index);
+    printf("  hostname:  %s\n", conf.hostname);
+    printf("  chroot:    %s\n", (conf.chroot) ? "yes" : "no");
+    
     /* if we're running as root... */
-	if (conf.chroot) {
-		printf("  user:      %s\n", conf.user);
-		printf("  group:     %s\n", conf.group);
-	}
+    if (conf.chroot) {
+        printf("  user:      %s\n", conf.user);
+        printf("  group:     %s\n", conf.group);
+    }
 
-	printf("  module(s): ");
+    printf("  module(s): ");
 
-	for (i = 0; i < conf.mod_cnt; i++)
-		printf("%s ", conf.mods[i].name);
+    for (i = 0; i < conf.mod_cnt; i++)
+        printf("%s ", conf.mods[i].name);
 
-	printf("%s\n", (conf.mod_cnt) ? " " : "none");
+    printf("%s\n", (conf.mod_cnt) ? " " : "none");
 #else
     printf("running in quiet mode...\n");
 #endif
@@ -625,194 +625,194 @@ int main(int argc, char *argv[])
     }
 #endif
 
-	/* initialize libevent */
-	event_init();
+    /* initialize libevent */
+    event_init();
 
-	/* set up all the ports while we have permission */
-	for (i = 0; i < conf.port_cnt; i++) {
-		/* set up our host */
-		if (!srv_conn_init(&pool[i], conf.ports[i])) {
-			/* something got fucked up */
-			ERRF(__FILE__, __LINE__,
-				 "error creating socket on %u!\n", conf.ports[i]);
-			return 1;
-		}
-	}
+    /* set up all the ports while we have permission */
+    for (i = 0; i < conf.port_cnt; i++) {
+        /* set up our host */
+        if (!srv_conn_init(&pool[i], conf.ports[i])) {
+            /* something got fucked up */
+            ERRF(__FILE__, __LINE__,
+                 "error creating socket on %u!\n", conf.ports[i]);
+            return 1;
+        }
+    }
 
-	/* set up our hashtables */
-	hash_init(&mps, SRV_MODULE_MAX);
-	hash_init(&cache, SRV_CACHE_MAX);
+    /* set up our hashtables */
+    hash_init(&mps, SRV_MODULE_MAX);
+    hash_init(&cache, SRV_CACHE_MAX);
 
-	/* key functions... basic string type */
-	hash_set_keycmp(&mps, hash_default_keycmp);
-	hash_set_keycpy(&mps, hash_default_keycpy);
-	hash_set_free_key(&mps, hash_default_free_key);
-	hash_set_keycmp(&cache, hash_default_keycmp);
-	hash_set_keycpy(&cache, hash_default_keycpy);
-	hash_set_free_key(&cache, hash_default_free_key);
+    /* key functions... basic string type */
+    hash_set_keycmp(&mps, hash_default_keycmp);
+    hash_set_keycpy(&mps, hash_default_keycpy);
+    hash_set_free_key(&mps, hash_default_free_key);
+    hash_set_keycmp(&cache, hash_default_keycmp);
+    hash_set_keycpy(&cache, hash_default_keycpy);
+    hash_set_free_key(&cache, hash_default_free_key);
 
-	/* val functions... pointer into module array */
-	hash_set_valcmp(&mps, srv_modhash_valcmp);
-	hash_set_valcpy(&mps, srv_modhash_alloc);
-	hash_set_free_val(&mps, srv_modhash_free);
-	hash_set_valcmp(&cache, srv_cache_valcmp);
-	hash_set_free_val(&cache, hash_default_free_key);
-	hash_set_valcpy(&cache, srv_cache_alloc);
+    /* val functions... pointer into module array */
+    hash_set_valcmp(&mps, srv_modhash_valcmp);
+    hash_set_valcpy(&mps, srv_modhash_alloc);
+    hash_set_free_val(&mps, srv_modhash_free);
+    hash_set_valcmp(&cache, srv_cache_valcmp);
+    hash_set_free_val(&cache, hash_default_free_key);
+    hash_set_valcpy(&cache, srv_cache_alloc);
 
-	/* set up our hidden and cached files. we set it up
-	 * so that hidden files, which 403, are treated as cached
-	 * files with the html served up being the preprocessor
-	 * strings defined in resp.h
-	 */
+    /* set up our hidden and cached files. we set it up
+     * so that hidden files, which 403, are treated as cached
+     * files with the html served up being the preprocessor
+     * strings defined in resp.h
+     */
 
-	/* first the pregenerated 404 response */
-	srv_resp_403(&rp[0]);
+    /* first the pregenerated 404 response */
+    srv_resp_403(&rp[0]);
 
-	for (i = 0; i < conf.hide_cnt; ++i) {
-		hash_insert(&cache, conf.hide[i], &rp[0]);
-		DEBUGF(__FILE__, __LINE__, "hid file %s!\n", conf.hide[i]);
-	}
+    for (i = 0; i < conf.hide_cnt; ++i) {
+        hash_insert(&cache, conf.hide[i], &rp[0]);
+        DEBUGF(__FILE__, __LINE__, "hid file %s!\n", conf.hide[i]);
+    }
 
-	/* set up our modules, insert paths into hashtable */
-	for (i = 0; i < conf.mod_cnt; ++i) {
-		/* get ready for it */
-		memset(&mods[i], '\0', sizeof mods[i]);
+    /* set up our modules, insert paths into hashtable */
+    for (i = 0; i < conf.mod_cnt; ++i) {
+        /* get ready for it */
+        memset(&mods[i], '\0', sizeof mods[i]);
 
-		/* get filename together */
-		snprintf(mods[i].path, sizeof mods[i].path, "%s/%s.so",
-				 conf.mods[i].path, conf.mods[i].name);
+        /* get filename together */
+        snprintf(mods[i].path, sizeof mods[i].path, "%s/%s.so",
+                 conf.mods[i].path, conf.mods[i].name);
 
-		/* load module */
-		DEBUGF(__FILE__, __LINE__, "loading module %s from %s...\n",
-			   conf.mods[i].name, mods[i].path);
-		mods[i].mod = dlopen(mods[i].path, RTLD_LAZY);
+        /* load module */
+        DEBUGF(__FILE__, __LINE__, "loading module %s from %s...\n",
+               conf.mods[i].name, mods[i].path);
+        mods[i].mod = dlopen(mods[i].path, RTLD_LAZY);
 
-		if (NULL == mods[i].mod) {
-			ERRF(__FILE__, __LINE__, "couldn't load module %s!\n");
-			continue;
-		}
+        if (NULL == mods[i].mod) {
+            ERRF(__FILE__, __LINE__, "couldn't load module %s!\n");
+            continue;
+        }
 
-		/* get our function symbol */
-		DEBUGF(__FILE__, __LINE__, "loading symbol %s from %s...\n",
-			   conf.mods[i].func, mods[i].path);
-		mods[i].func = (_srv_modfunc_t) dlsym(mods[i].mod, conf.mods[i].func);
+        /* get our function symbol */
+        DEBUGF(__FILE__, __LINE__, "loading symbol %s from %s...\n",
+               conf.mods[i].func, mods[i].path);
+        mods[i].func = (_srv_modfunc_t) dlsym(mods[i].mod, conf.mods[i].func);
 
-		if (NULL == mods[i].func) {
-			ERRF(__FILE__, __LINE__, "couldn't get function %s\n",
-				 conf.mods[i].func);
-			continue;
-		}
+        if (NULL == mods[i].func) {
+            ERRF(__FILE__, __LINE__, "couldn't get function %s\n",
+                 conf.mods[i].func);
+            continue;
+        }
 
-		for (j = 0; j < conf.mods[i].hnd_cnt; j++) {
-			/* insert into hash */
-			if (conf.mods[i].hnd[j].type == SRV_HANDLER_FILE) {
-				/* add this path to handler hash */
-				DEBUGF(__FILE__, __LINE__,
-					   "request path %s to be handled with %s...\n",
-					   conf.mods[i].hnd[j].data, conf.mods[i].func);
-				hash_insert(&mps, conf.mods[i].hnd[j].data, &mods[i]);
-			}
-		}
-	}
+        for (j = 0; j < conf.mods[i].hnd_cnt; j++) {
+            /* insert into hash */
+            if (conf.mods[i].hnd[j].type == SRV_HANDLER_FILE) {
+                /* add this path to handler hash */
+                DEBUGF(__FILE__, __LINE__,
+                       "request path %s to be handled with %s...\n",
+                       conf.mods[i].hnd[j].data, conf.mods[i].func);
+                hash_insert(&mps, conf.mods[i].hnd[j].data, &mods[i]);
+            }
+        }
+    }
 
-	/* everything else we don't need to do as root */
-	if (!geteuid()) {
-		if (NULL != conf.user && NULL != conf.group) {
-			/* get the user info */
-			user = getpwnam(conf.user);
+    /* everything else we don't need to do as root */
+    if (!geteuid()) {
+        if (NULL != conf.user && NULL != conf.group) {
+            /* get the user info */
+            user = getpwnam(conf.user);
 
-			if (NULL == user) {
-				ERRF(__FILE__, __LINE__, "invalid user %s!\n", conf.user);
-				return 1;
-			}
+            if (NULL == user) {
+                ERRF(__FILE__, __LINE__, "invalid user %s!\n", conf.user);
+                return 1;
+            }
 
-			/* get the group info */
-			group = getgrnam(conf.group);
+            /* get the group info */
+            group = getgrnam(conf.group);
 
-			if (NULL == group) {
-				ERRF(__FILE__, __LINE__, "invalid group %s!\n", conf.group);
-				return 1;
-			}
+            if (NULL == group) {
+                ERRF(__FILE__, __LINE__, "invalid group %s!\n", conf.group);
+                return 1;
+            }
 
-			/* successfully got the user/group data */
+            /* successfully got the user/group data */
 
-			/* do they want to chroot? we need to do this before
-			 * switching our user and group.
-			 */
-			if (conf.chroot) {
-				if (chdir(conf.docroot) == -1) {
-					/* fail */
-					ERRF(__FILE__, __LINE__,
-						 "could not chdir to %s: %s!\n",
-						 conf.docroot, strerror(errno));
-					return 1;
-				}
+            /* do they want to chroot? we need to do this before
+             * switching our user and group.
+             */
+            if (conf.chroot) {
+                if (chdir(conf.docroot) == -1) {
+                    /* fail */
+                    ERRF(__FILE__, __LINE__,
+                         "could not chdir to %s: %s!\n",
+                         conf.docroot, strerror(errno));
+                    return 1;
+                }
 
-				if (chroot(conf.docroot) == -1) {
-					/* fail */
-					ERRF(__FILE__, __LINE__,
-						 "could not chroot to %s: %s!\n",
-						 conf.docroot, strerror(errno));
-					return 1;
-				}
+                if (chroot(conf.docroot) == -1) {
+                    /* fail */
+                    ERRF(__FILE__, __LINE__,
+                         "could not chroot to %s: %s!\n",
+                         conf.docroot, strerror(errno));
+                    return 1;
+                }
 
-				/* we successfully chrooted.  now we want to
-				 * make our path to files / instead of whatever
-				 * the docroot was previously
-				 */
-				free(conf.docroot);
-				conf.docroot = strdup("/");
-			}
+                /* we successfully chrooted.  now we want to
+                 * make our path to files / instead of whatever
+                 * the docroot was previously
+                 */
+                free(conf.docroot);
+                conf.docroot = strdup("/");
+            }
 
-			/* now become someone non-root, for security reasons */
+            /* now become someone non-root, for security reasons */
 
-			/* try to join the group */
-			if (setgid(group->gr_gid) == -1) {
-				ERRF(__FILE__, __LINE__,
-					 "could not join group %s: %s!\n",
-					 conf.group, strerror(errno));
-				return 1;
-			}
+            /* try to join the group */
+            if (setgid(group->gr_gid) == -1) {
+                ERRF(__FILE__, __LINE__,
+                     "could not join group %s: %s!\n",
+                     conf.group, strerror(errno));
+                return 1;
+            }
 
-			/* try to assume the new identity */
-			if (setuid(user->pw_uid) == -1) {
-				ERRF(__FILE__, __LINE__,
-					 "could not become user %s: %s!\n",
-					 conf.user, strerror(errno));
-				return 1;
-			}
-		} else {
-			fprintf(stderr,
-					"i'm currently running as root, but you haven't provided\n"
-					"a non-root username and group to switch to. this is not\n"
-					"secure, so please choose a less priveliged username and\n"
-					"group to use, then change srv.conf accordingly. thanks!\n");
+            /* try to assume the new identity */
+            if (setuid(user->pw_uid) == -1) {
+                ERRF(__FILE__, __LINE__,
+                     "could not become user %s: %s!\n",
+                     conf.user, strerror(errno));
+                return 1;
+            }
+        } else {
+            fprintf(stderr,
+                    "i'm currently running as root, but you haven't provided\n"
+                    "a non-root username and group to switch to. this is not\n"
+                    "secure, so please choose a less priveliged username and\n"
+                    "group to use, then change srv.conf accordingly. thanks!\n");
             ERRF(__FILE__, __LINE__, "chroot without user switch.\n");
-			return 1;
-		}
-	}
+            return 1;
+        }
+    }
 
-	/* set up the thread pool handler */
-	tpool_init(&tp, SRV_TPOOL_MAX, srv_threadpool_controller,
-			   srv_threadpool_handler);
-	stack_set_data_alloc(&tp.work, srv_threadpool_alloc);
-	stack_set_data_free(&tp.work, free);
+    /* set up the thread pool handler */
+    tpool_init(&tp, SRV_TPOOL_MAX, srv_threadpool_controller,
+               srv_threadpool_handler);
+    stack_set_data_alloc(&tp.work, srv_threadpool_alloc);
+    stack_set_data_free(&tp.work, free);
 
-	/* now set up handlers for when we have incoming connections! */
-	for (i = 0; i < conf.port_cnt; i++) {
-		/* set up the accept event */
-		event_set(&pool[i].ev, pool[i].sock,
-				  EV_READ | EV_PERSIST, srv_accept_new_conn, NULL);
-		event_add(&pool[i].ev, NULL);
-	}
+    /* now set up handlers for when we have incoming connections! */
+    for (i = 0; i < conf.port_cnt; i++) {
+        /* set up the accept event */
+        event_set(&pool[i].ev, pool[i].sock,
+                  EV_READ | EV_PERSIST, srv_accept_new_conn, NULL);
+        event_add(&pool[i].ev, NULL);
+    }
 
-	/* begin our main loop */
-	event_dispatch();
+    /* begin our main loop */
+    event_dispatch();
 
-	/* this is kinda useless but fuck it */
-	for (i = 0; i < conf.port_cnt; i++) {
-		srv_conn_cleanup(&pool[i]);
-	}
+    /* this is kinda useless but fuck it */
+    for (i = 0; i < conf.port_cnt; i++) {
+        srv_conn_cleanup(&pool[i]);
+    }
 
-	return 0;
+    return 0;
 }

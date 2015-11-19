@@ -37,48 +37,48 @@
 #define SRV_HANDLER_EXT   2
 
 struct _srvhndlr_conf_t {
-	short type;
-	char *data;
+    short type;
+    char *data;
 };
 
 struct _srvmod_conf_t {
-	char *name;
-	char *path;
-	char *func;
+    char *name;
+    char *path;
+    char *func;
 
-	struct _srvhndlr_conf_t hnd[SRV_HANDLER_MAX];
-	unsigned int hnd_cnt;
+    struct _srvhndlr_conf_t hnd[SRV_HANDLER_MAX];
+    unsigned int hnd_cnt;
 };
 
 /* config def */
 typedef struct {
-	/* can run on SRV_HOSTS_MAX ports */
-	unsigned short ports[SRV_PORT_MAX];
-	unsigned int port_cnt;
+    /* can run on SRV_HOSTS_MAX ports */
+    unsigned short ports[SRV_PORT_MAX];
+    unsigned int port_cnt;
 
-	/* chroot boolean */
-	unsigned int chroot;
+    /* chroot boolean */
+    unsigned int chroot;
 
-	unsigned int hide_cnt;
-	char *hide[SRV_CACHE_MAX];
-	char *hostname;
-	char *docroot;
-	char *index;
+    unsigned int hide_cnt;
+    char *hide[SRV_CACHE_MAX];
+    char *hostname;
+    char *docroot;
+    char *index;
 
-	/* when running as root */
-	char *group;
-	char *user;
+    /* when running as root */
+    char *group;
+    char *user;
 
-	/* set up modules */
-	struct _srvmod_conf_t mods[SRV_MODULE_MAX];
-	unsigned int mod_cnt;
+    /* set up modules */
+    struct _srvmod_conf_t mods[SRV_MODULE_MAX];
+    unsigned int mod_cnt;
 
-#if 0							/* not implemented */
-	/* number of connections */
-	unsigned int max_conn;
+#if 0                            /* not implemented */
+    /* number of connections */
+    unsigned int max_conn;
 
-	/* kill after... */
-	unsigned int conn_time;
+    /* kill after... */
+    unsigned int conn_time;
 #endif
 } conf_t;
 

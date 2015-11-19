@@ -44,84 +44,84 @@
  */
 int srv_conn_init(conn_t * conn, unsigned short port)
 {
-	int y = 1;
+    int y = 1;
 
 #ifdef DEBUG
-	assert(NULL != conn);
-	assert(port > 0);
+    assert(NULL != conn);
+    assert(port > 0);
 #endif
 
-	conn->sock = -1;
-	conn->state = CONN_STATE_NEW;
-	conn->locked = 0;
+    conn->sock = -1;
+    conn->state = CONN_STATE_NEW;
+    conn->locked = 0;
 
-	if ((conn->sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
-		/* problems creating the socket */
-		ERRF(__FILE__, __LINE__, "creating socket: %s!\n", strerror(errno));
-		return 0;
-	}
+    if ((conn->sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
+        /* problems creating the socket */
+        ERRF(__FILE__, __LINE__, "creating socket: %s!\n", strerror(errno));
+        return 0;
+    }
 
-	if (setsockopt(conn->sock, SOL_SOCKET, SO_REUSEADDR, &y, sizeof y) == -1) {
-		/* couldn't clear up a lingering socket */
-		ERRF(__FILE__, __LINE__, "clearing socket: %s!\n", strerror(errno));
-		close(conn->sock);
-		return 0;
-	}
+    if (setsockopt(conn->sock, SOL_SOCKET, SO_REUSEADDR, &y, sizeof y) == -1) {
+        /* couldn't clear up a lingering socket */
+        ERRF(__FILE__, __LINE__, "clearing socket: %s!\n", strerror(errno));
+        close(conn->sock);
+        return 0;
+    }
 
-	/* these aren't portable, so check if they are around 
-	 * before we start dicking around with setting them.
-	 */
+    /* these aren't portable, so check if they are around 
+     * before we start dicking around with setting them.
+     */
 
 #ifdef TCP_DEFER_ACCEPT
-	/* keep listener sleeping until when data arrives */
-	if (setsockopt(conn->sock, IPPROTO_TCP, TCP_DEFER_ACCEPT,
-				   &y, sizeof y) == -1) {
-		/* couldn't set TCP_DEFER_ACCEPT */
-		ERRF(__FILE__, __LINE__, "defer accept: %s!\n", strerror(errno));
-		close(conn->sock);
-		return 0;
-	}
+    /* keep listener sleeping until when data arrives */
+    if (setsockopt(conn->sock, IPPROTO_TCP, TCP_DEFER_ACCEPT,
+                   &y, sizeof y) == -1) {
+        /* couldn't set TCP_DEFER_ACCEPT */
+        ERRF(__FILE__, __LINE__, "defer accept: %s!\n", strerror(errno));
+        close(conn->sock);
+        return 0;
+    }
 #endif
 
 #ifdef TCP_NODELAY
-	/* since all this does is accept connections */
-	if (setsockopt(conn->sock, IPPROTO_TCP, TCP_NODELAY, &y, sizeof y) == -1) {
-		/* couldn't set TCP_NODELAY */
-		ERRF(__FILE__, __LINE__, "nodelay: %s!\n", strerror(errno));
-		close(conn->sock);
-		return 0;
-	}
+    /* since all this does is accept connections */
+    if (setsockopt(conn->sock, IPPROTO_TCP, TCP_NODELAY, &y, sizeof y) == -1) {
+        /* couldn't set TCP_NODELAY */
+        ERRF(__FILE__, __LINE__, "nodelay: %s!\n", strerror(errno));
+        close(conn->sock);
+        return 0;
+    }
 #endif
 
-	/* make the socket non-blocking */
-	if (fcntl(conn->sock, F_SETFL, O_NONBLOCK) == -1) {
-		/* failure */
-		ERRF(__FILE__, __LINE__, "non blocking: %s!\n", strerror(errno));
-		close(conn->sock);
-		return 0;
-	}
+    /* make the socket non-blocking */
+    if (fcntl(conn->sock, F_SETFL, O_NONBLOCK) == -1) {
+        /* failure */
+        ERRF(__FILE__, __LINE__, "non blocking: %s!\n", strerror(errno));
+        close(conn->sock);
+        return 0;
+    }
 
-	conn->addr.sin_family = AF_INET;
-	conn->addr.sin_port = htons(port);
-	conn->addr.sin_addr.s_addr = INADDR_ANY;
-	memset(&(conn->addr.sin_zero), '\0', 8);
+    conn->addr.sin_family = AF_INET;
+    conn->addr.sin_port = htons(port);
+    conn->addr.sin_addr.s_addr = INADDR_ANY;
+    memset(&(conn->addr.sin_zero), '\0', 8);
 
-	/* lets see if we can bind to the port we want */
-	if (bind(conn->sock, (struct sockaddr *)&conn->addr,
-			 sizeof(struct sockaddr)) == -1) {
-		ERRF(__FILE__, __LINE__, "bind: %s!\n", strerror(errno));
-		close(conn->sock);
-		return 0;
-	}
+    /* lets see if we can bind to the port we want */
+    if (bind(conn->sock, (struct sockaddr *)&conn->addr,
+             sizeof(struct sockaddr)) == -1) {
+        ERRF(__FILE__, __LINE__, "bind: %s!\n", strerror(errno));
+        close(conn->sock);
+        return 0;
+    }
 
-	/* lets see if we can listen on this port now */
-	if (listen(conn->sock, SOMAXCONN) == -1) {
-		ERRF(__FILE__, __LINE__, "listen: %s!\n", strerror(errno));
-		close(conn->sock);
-		return 0;
-	}
+    /* lets see if we can listen on this port now */
+    if (listen(conn->sock, SOMAXCONN) == -1) {
+        ERRF(__FILE__, __LINE__, "listen: %s!\n", strerror(errno));
+        close(conn->sock);
+        return 0;
+    }
 
-	return 1;
+    return 1;
 }
 
 /**
@@ -130,44 +130,44 @@ int srv_conn_init(conn_t * conn, unsigned short port)
 void srv_conn_cleanup(conn_t * conn)
 {
 #ifdef DEBUG
-	assert(NULL != conn);
+    assert(NULL != conn);
 #endif
 
-	if (-1 == conn->sock) {
-		/* do nothing. */
-		return;
-	}
+    if (-1 == conn->sock) {
+        /* do nothing. */
+        return;
+    }
 
-	if (conn->state != CONN_STATE_DESTROY)
-		DEBUGF(__FILE__, __LINE__,
-			   "(sock:%d) preemptive close of connection\n", conn->sock);
+    if (conn->state != CONN_STATE_DESTROY)
+        DEBUGF(__FILE__, __LINE__,
+               "(sock:%d) preemptive close of connection\n", conn->sock);
 
-	/* nicer way to close instead of straight disconnect */
-	if (shutdown(conn->sock, SHUT_WR)) {
-		if (errno != ENOTCONN) {
-			ERRF(__FILE__, __LINE__,
-				 "shutting down socket(%d)! %s\n", conn->sock, strerror(errno));
-			return;
-		}
-	}
+    /* nicer way to close instead of straight disconnect */
+    if (shutdown(conn->sock, SHUT_WR)) {
+        if (errno != ENOTCONN) {
+            ERRF(__FILE__, __LINE__,
+                 "shutting down socket(%d)! %s\n", conn->sock, strerror(errno));
+            return;
+        }
+    }
 
-	/* if the shutdown wasn't respected... */
-	if (-1 != conn->sock) {
-		if (close(conn->sock)) {
-			ERRF(__FILE__, __LINE__, "closing socket! %s\n", strerror(errno));
-			return;
-		}
-	}
+    /* if the shutdown wasn't respected... */
+    if (-1 != conn->sock) {
+        if (close(conn->sock)) {
+            ERRF(__FILE__, __LINE__, "closing socket! %s\n", strerror(errno));
+            return;
+        }
+    }
 
-	if (conn->fd) {
-		/* our filehandle still open */
-		close(conn->fd);
-	}
+    if (conn->fd) {
+        /* our filehandle still open */
+        close(conn->fd);
+    }
 
-	conn->fd = 0;
-	conn->sock = -1;
-	conn->state = CONN_STATE_NEW;
-	conn->locked = 0;
+    conn->fd = 0;
+    conn->sock = -1;
+    conn->state = CONN_STATE_NEW;
+    conn->locked = 0;
 
-	memset(&conn->addr, 0, sizeof &conn->addr);
+    memset(&conn->addr, 0, sizeof &conn->addr);
 }

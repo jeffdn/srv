@@ -52,49 +52,49 @@
     "</html>"
 
 char *handle_mre(char *path, struct srv_mod_trans *mt,
-				 struct srv_req_param *params, unsigned int cnt)
+                 struct srv_req_param *params, unsigned int cnt)
 {
-	char *data, buf[16384];
-	unsigned int i, len;
-	int got, fd;
+    char *data, buf[16384];
+    unsigned int i, len;
+    int got, fd;
 
-	memset(buf, '\0', sizeof buf);
+    memset(buf, '\0', sizeof buf);
 
-	if (!(fd = open(path, O_RDONLY)))
-		return NULL;
+    if (!(fd = open(path, O_RDONLY)))
+        return NULL;
 
-	got = read(fd, buf, sizeof buf);
-	close(fd);
+    got = read(fd, buf, sizeof buf);
+    close(fd);
 
-	if (buf[0] == '\0')
-		return NULL;
+    if (buf[0] == '\0')
+        return NULL;
 
-	len = strlen(HEAD) + got + strlen(TAIL) + 14;
+    len = strlen(HEAD) + got + strlen(TAIL) + 14;
 
-	for (i = 0; i < cnt; i++) {
-		/* print out params */
-		len += strlen(params[i].key) + strlen(params[i].val) + 9;
-	}
+    for (i = 0; i < cnt; i++) {
+        /* print out params */
+        len += strlen(params[i].key) + strlen(params[i].val) + 9;
+    }
 
-	data = calloc(1, len);
+    data = calloc(1, len);
 
-	if (NULL == data)
-		return NULL;
+    if (NULL == data)
+        return NULL;
 
-	snprintf(data, len, "%s<h3>%s</h3>", HEAD, buf);
+    snprintf(data, len, "%s<h3>%s</h3>", HEAD, buf);
 
-	for (i = 0; i < cnt; i++) {
-		strcat(data, params[i].key);
-		strcat(data, ":");
-		strcat(data, params[i].val);
-		strcat(data, "<br/>");
-	}
+    for (i = 0; i < cnt; i++) {
+        strcat(data, params[i].key);
+        strcat(data, ":");
+        strcat(data, params[i].val);
+        strcat(data, "<br/>");
+    }
 
-	strcat(data, "\r\n\r\n");
+    strcat(data, "\r\n\r\n");
 
-	mt->ftype = 9;
-	mt->status = SRV_MOD_SUCCESS;
-	mt->len = len;
+    mt->ftype = 9;
+    mt->status = SRV_MOD_SUCCESS;
+    mt->len = len;
 
-	return data;
+    return data;
 }
