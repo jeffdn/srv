@@ -14,7 +14,7 @@ UTIL = hash.o \
        thread.o \
 	   vector.o \
        utstring.o \
-	   util.o 
+	   util.o
 
 all: srv
 
@@ -29,7 +29,7 @@ conn.o: conn.h conn.c
 
 resp.o: resp.h resp.c
 	${CC} ${CFLAGS} -c resp.c
-	
+
 conf.o: conf.h conf.c
 	${CC} ${CFLAGS} -c conf.c
 

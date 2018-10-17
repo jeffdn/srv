@@ -16,7 +16,7 @@ OBJ = sock.o \
 debug: all
 
 all: libutil
-	
+
 sock.o: sock.h sock.c
 	${CC} ${CFLAGS} -c sock.c
 
@@ -61,6 +61,6 @@ libutil: sock.o stack.o module.o hash.o iter.o util.o vector.o thread.o utstring
 
 clean:
 	rm -f *.o
-	
+
 remove:
 	rm -f *.o libutil.*

@@ -169,5 +169,5 @@ void srv_conn_cleanup(conn_t * conn)
     conn->state = CONN_STATE_NEW;
     conn->locked = 0;
 
-    memset(&conn->addr, 0, sizeof &conn->addr);
+    memset(&conn->addr, 0, sizeof conn->addr);
 }
